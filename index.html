@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<!-- language: HTML5, file: index.html, deploy: GitHub Pages (статика) -->
+<!-- В API_BASE ниже подставь адрес своего бэкенда (Termux: http://<ip>:8000 или домен с https) -->
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AutoBot PR GRAM</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  body {
+    background: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    font-size: 17px;
+    min-height: 100vh;
+    padding-bottom: 90px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hidden { display: none !important; }
+
+  /* экраны-заглушки */
+  #screen-block {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--tg-theme-bg-color);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 32px;
+  }
+  #screen-block .icon { font-size: 48px; margin-bottom: 20px; }
+  #screen-block .title { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+  #screen-block .text {
+    color: var(--tg-theme-hint-color); font-size: 15px; line-height: 1.55;
+    max-width: 320px;
+  }
+  #screen-block .text b { color: var(--tg-theme-text-color); }
+
+  /* общий каркас */
+  .container { max-width: 560px; margin: 0 auto; padding: 16px; }
+  .card {
+    background: var(--tg-theme-secondary-bg-color);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .card-title { font-size: 13px; color: var(--tg-theme-hint-color); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px; }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+  .row + .row { border-top: 1px solid var(--tg-theme-section-separator-color, rgba(128,128,128,.15)); }
+  .row .label { font-size: 16px; }
+  .row .value { font-size: 16px; color: var(--tg-theme-hint-color); text-align: right; }
+
+  /* профиль */
+  .profile-head { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 600; flex-shrink: 0;
+  }
+  .profile-name { font-size: 20px; font-weight: 600; }
+  .profile-sub { color: var(--tg-theme-hint-color); font-size: 14px; margin-top: 3px; }
+
+  .pill {
+    display: inline-block; padding: 5px 12px; border-radius: 20px;
+    font-size: 13px; font-weight: 600;
+  }
+  .pill.ok { background: rgba(76,175,80,.15); color: #4caf50; }
+  .pill.off { background: rgba(128,128,128,.15); color: var(--tg-theme-hint-color); }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-card {
+    background: var(--tg-theme-secondary-bg-color);
+    border-radius: 16px; padding: 20px;
+  }
+  .stat-num { font-size: 28px; font-weight: 700; }
+  .stat-label { font-size: 13px; color: var(--tg-theme-hint-color); margin-top: 4px; }
+
+  /* формы настроек */
+  input[type="text"], input[type="number"] {
+    background: var(--tg-theme-bg-color);
+    border: 1px solid var(--tg-theme-section-separator-color, rgba(128,128,128,.25));
+    color: var(--tg-theme-text-color);
+    border-radius: 12px; padding: 12px 16px;
+    font-size: 16px; width: 110px; text-align: right; outline: none;
+  }
+  .seg { display: flex; background: var(--tg-theme-bg-color); border-radius: 12px; padding: 3px; }
+  .seg button {
+    flex: 1; border: none; background: transparent; color: var(--tg-theme-hint-color);
+    padding: 9px 14px; border-radius: 10px; font-size: 15px; cursor: pointer;
+  }
+  .seg button.active { background: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); }
+
+  /* переключатель */
+  .switch { position: relative; width: 52px; height: 30px; flex-shrink: 0; cursor: pointer; }
+  .switch input { display: none; }
+  .switch .track {
+    position: absolute; inset: 0; border-radius: 15px;
+    background: var(--tg-theme-section-separator-color, rgba(128,128,128,.3));
+    transition: background .2s;
+  }
+  .switch .knob {
+    position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
+    border-radius: 50%; background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    transition: transform .2s;
+  }
+  .switch input:checked + .track { background: var(--tg-theme-button-color); }
+  .switch input:checked + .track + .knob { transform: translateX(22px); }
+
+  /* главные кнопки */
+  .btn {
+    display: block; width: 100%;
+    background: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none; border-radius: 14px;
+    padding: 16px; font-size: 17px; font-weight: 600; cursor: pointer;
+  }
+  .btn.secondary {
+    background: transparent;
+    color: var(--tg-theme-link-color, #2481cc);
+    border: 1.5px solid var(--tg-theme-link-color, #2481cc);
+  }
+  .btn:active { opacity: .75; }
+  .btn-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+
+  /* нижняя навигация */
+  #nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    background: var(--tg-theme-bg-color);
+    border-top: 1px solid var(--tg-theme-section-separator-color, rgba(128,128,128,.15));
+    display: flex; padding: 8px 0 env(safe-area-inset-bottom);
+  }
+  #nav button {
+    flex: 1; background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    color: var(--tg-theme-hint-color); font-size: 11px; padding: 6px 0;
+  }
+  #nav button .nav-ic { font-size: 22px; line-height: 1; }
+  #nav button.active { color: var(--tg-theme-link-color, #2481cc); }
+
+  /* тост */
+  #toast {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--tg-theme-text-color); color: var(--tg-theme-bg-color);
+    padding: 10px 22px; border-radius: 22px; font-size: 14px; font-weight: 500;
+    opacity: 0; transition: all .25s; z-index: 200; pointer-events: none;
+    max-width: 85vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .section-h { font-size: 15px; font-weight: 600; color: var(--tg-theme-hint-color); margin: 20px 4px 10px; }
+</style>
+</head>
+<body>
+
+<!-- заглушка: аккаунт не привязан -->
+<div id="screen-block" class="hidden">
+  <div class="icon">🔒</div>
+  <div class="title">Аккаунт не привязан</div>
+  <div class="text">Пожалуйста, откройте бота <b>@AutoBot</b>, напишите <b>/start</b> и завершите привязку аккаунта, затем перезапустите приложение.</div>
+</div>
+
+<!-- ошибка сети -->
+<div id="screen-error" class="hidden">
+  <div class="icon">📡</div>
+  <div class="title">Нет связи с сервером</div>
+  <div class="text">Не удалось связаться с сервером AutoBot. Проверьте соединение и перезапустите приложение.</div>
+</div>
+
+<!-- основной интерфейс -->
+<div id="app" class="hidden">
+  <div class="container">
+
+    <!-- ПРОФИЛЬ -->
+    <div id="tab-profile">
+      <div class="card">
+        <div class="profile-head">
+          <div class="avatar" id="p-avatar">A</div>
+          <div>
+            <div class="profile-name" id="p-name">—</div>
+            <div class="profile-sub" id="p-user">—</div>
+          </div>
+        </div>
+        <div class="row"><span class="label">Telegram ID</span><span class="value" id="p-id">—</span></div>
+        <div class="row"><span class="label">Аккаунт</span><span class="value" id="p-linked">—</span></div>
+        <div class="row"><span class="label">Подписка</span><span class="value" id="p-sub">—</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Реферальная ссылка</div>
+        <div class="row" style="border:none; padding-top:4px">
+          <span class="value" id="p-reflink" style="text-align:left; font-size:14px; word-break:break-all; flex:1; margin-right:12px">—</span>
+        </div>
+        <button class="btn secondary" onclick="copyRef()">Скопировать ссылку</button>
+      </div>
+    </div>
+
+    <!-- СТАТИСТИКА -->
+    <div id="tab-stats" class="hidden">
+      <div class="section-h">Общая</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num" id="s-users">—</div><div class="stat-label">Пользователей</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-purchases">—</div><div class="stat-label">Покупок</div></div>
+      </div>
+      <div class="section-h">Твои показатели</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num" id="s-refs">—</div><div class="stat-label">Рефералов</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-hours">—</div><div class="stat-label">Часов от рефералов</div></div>
+      </div>
+    </div>
+
+    <!-- НАСТРОЙКИ -->
+    <div id="tab-settings" class="hidden">
+      <div class="card">
+        <div class="card-title">Выполнение заданий</div>
+        <div class="row">
+          <span class="label">Тип заданий</span>
+          <div class="seg">
+            <button id="tgt-ch" onclick="setTarget('channels')">Каналы</button>
+            <button id="tgt-gr" onclick="setTarget('groups')">Группы</button>
+          </div>
+        </div>
+        <div class="row">
+          <span class="label">Задержка, сек</span>
+          <input type="number" id="set-delay" min="3" step="0.5" style="width:80px">
+        </div>
+        <div class="row">
+          <span class="label">Рандом задержки</span>
+          <label class="switch"><input type="checkbox" id="set-jitter" onchange="setSwitch('random_delay', this.checked)"><span class="track"></span><span class="knob"></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Автоматизация</div>
+        <div class="row">
+          <span class="label">Авто-архив</span>
+          <label class="switch"><input type="checkbox" id="set-archive" onchange="setSwitch('auto_archive', this.checked)"><span class="track"></span><span class="knob"></span></label>
+        </div>
+        <div class="row">
+          <span class="label">Авто-отписка, дней</span>
+          <input type="number" id="set-unsub" min="7" step="1" style="width:80px">
+        </div>
+        <button class="btn" onclick="saveNumbers()">Сохранить</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Рабочий бот заданий</div>
+        <div class="seg" style="padding:0">
+          <button id="bot-piar" onclick="setBot('gram_piarbot')">@gram_piarbot</button>
+          <button id="bot-pr" onclick="setBot('gram_prbot')">@gram_prbot</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- УПРАВЛЕНИЕ -->
+    <div id="tab-control" class="hidden">
+      <div class="card">
+        <div class="card-title">AutoBot</div>
+        <div class="row" style="border:none">
+          <span class="label">Статус подписки</span>
+          <span class="value" id="c-sub">—</span>
+        </div>
+        <div class="btn-stack">
+          <button class="btn" onclick="sendCommand('start')">▶ Запустить AutoBot</button>
+          <button class="btn secondary" onclick="sendCommand('stop')">■ Остановить</button>
+        </div>
+      </div>
+      <div class="card" id="c-free-card">
+        <div class="card-title">Бесплатная подписка</div>
+        <div class="row" style="border:none">
+          <span class="label" style="flex:1; margin-right:12px">Получить 7 дней бесплатно — один раз</span>
+        </div>
+        <button class="btn" id="c-free-btn" onclick="claimFree()">Получить 7 дней</button>
+      </div>
+    </div>
+
+  </div>
+
+  <nav id="nav">
+    <button class="active" data-tab="profile" onclick="switchTab('profile')"><span class="nav-ic">👤</span>Профиль</button>
+    <button data-tab="stats" onclick="switchTab('stats')"><span class="nav-ic">📊</span>Статистика</button>
+    <button data-tab="settings" onclick="switchTab('settings')"><span class="nav-ic">⚙️</span>Настройки</button>
+    <button data-tab="control" onclick="switchTab('control')"><span class="nav-ic">🎮</span>Управление</button>
+  </nav>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+const API_BASE = "https://YOUR-BACKEND-URL"; // ← подставь адрес main.py
+const tg = window.Telegram.WebApp;
+
+tg.ready();
+tg.expand();
+
+let ME = null;      // данные /api/me
+let SETTINGS = null;
+
+/* ---------- API ---------- */
+async function api(path, body = {}) {
+  const resp = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({ init_data: tg.initData }, body))
+  });
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  return resp.json();
+}
+
+/* ---------- тост ---------- */
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function haptic(type) {
+  try { tg.HapticFeedback.impactOccurred(type || 'light'); } catch (e) {}
+}
+
+/* ---------- запуск ---------- */
+async function boot() {
+  try {
+    ME = await api('/api/me');
+  } catch (e) {
+    document.getElementById('screen-error').classList.remove('hidden');
+    return;
+  }
+
+  // блокировка: нет в базе или не привязан
+  if (!ME.ok || !ME.registered || !ME.linked) {
+    document.getElementById('screen-block').classList.remove('hidden');
+    return;
+  }
+
+  document.getElementById('app').classList.remove('hidden');
+  renderProfile();
+  loadStats();
+  loadSettings();
+}
+
+function renderProfile() {
+  const u = ME.user || {};
+  const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Пользователь';
+  document.getElementById('p-avatar').textContent = (u.first_name || 'A')[0].toUpperCase();
+  document.getElementById('p-name').textContent = name;
+  document.getElementById('p-user').textContent = u.username ? '@' + u.username : 'без username';
+  document.getElementById('p-id').textContent = ME.telegram_id;
+
+  const linked = document.getElementById('p-linked');
+  if (ME.linked) { linked.innerHTML = '<span class="pill ok">привязан</span>'; }
+  else { linked.innerHTML = '<span class="pill off">не привязан</span>'; }
+
+  const sub = document.getElementById('p-sub');
+  const csub = document.getElementById('c-sub');
+  if (ME.sub_active) {
+    const days = Math.max(1, Math.ceil((ME.sub_until - Date.now() / 1000) / 86400));
+    sub.innerHTML = '<span class="pill ok">активна, ' + days + ' дн.</span>';
+    csub.innerHTML = '<span class="pill ok">' + days + ' дней</span>';
+  } else {
+    sub.innerHTML = '<span class="pill off">нет</span>';
+    csub.innerHTML = '<span class="pill off">нет подписки</span>';
+  }
+
+  // реферальная ссылка — берём username бота из настроек фронтенда нельзя, узнаем у бэка
+  document.getElementById('p-reflink').textContent = ME.ref_link || '—';
+
+  // бесплатка
+  if (ME.free_used || ME.sub_active) {
+    document.getElementById('c-free-card').classList.add('hidden');
+  }
+}
+
+async function loadStats() {
+  try {
+    const s = await api('/api/stats');
+    document.getElementById('s-users').textContent = s.users;
+    document.getElementById('s-purchases').textContent = s.purchases;
+    document.getElementById('s-refs').textContent = s.refs;
+    document.getElementById('s-hours').textContent = s.refs * 12;
+  } catch (e) { toast('Не удалось загрузить статистику'); }
+}
+
+async function loadSettings() {
+  try {
+    SETTINGS = await api('/api/settings');
+    document.getElementById('tgt-ch').classList.toggle('active', SETTINGS.target === 'channels');
+    document.getElementById('tgt-gr').classList.toggle('active', SETTINGS.target === 'groups');
+    document.getElementById('set-delay').value = SETTINGS.delay;
+    document.getElementById('set-jitter').checked = SETTINGS.random_delay;
+    document.getElementById('set-archive').checked = SETTINGS.auto_archive;
+    document.getElementById('set-unsub').value = SETTINGS.unsub_days;
+    document.getElementById('bot-piar').classList.toggle('active', SETTINGS.bot_username === 'gram_piarbot');
+    document.getElementById('bot-pr').classList.toggle('active', SETTINGS.bot_username === 'gram_prbot');
+  } catch (e) { toast('Не удалось загрузить настройки'); }
+}
+
+/* ---------- изменения настроек ---------- */
+async function setTarget(target) {
+  haptic();
+  await patchSettings({ target: target });
+}
+async function setBot(bot_username) {
+  haptic();
+  await patchSettings({ bot_username: bot_username });
+}
+async function setSwitch(key, value) {
+  haptic();
+  await patchSettings({ [key]: value });
+}
+async function saveNumbers() {
+  const delay = parseFloat(document.getElementById('set-delay').value);
+  const unsub = parseInt(document.getElementById('set-unsub').value);
+  if (isNaN(delay) || delay < 3) { toast('Задержка: минимум 3 секунды'); return; }
+  if (isNaN(unsub) || unsub < 7) { toast('Авто-отписка: минимум 7 дней'); return; }
+  await patchSettings({ delay: delay, unsub_days: unsub });
+}
+
+async function patchSettings(patch) {
+  try {
+    SETTINGS = await api('/api/settings/update', { patch: patch });
+    loadSettings();
+    toast('Сохранено');
+  } catch (e) {
+    toast('Ошибка сохранения');
+    loadSettings();
+  }
+}
+
+/* ---------- команды бота ---------- */
+async function sendCommand(cmd) {
+  haptic('medium');
+  try {
+    const r = await api('/api/command', { command: cmd });
+    toast(r.ok ? (cmd === 'start' ? 'Команда отправлена — смотри бота' : 'Остановка отправлена') : r.error);
+  } catch (e) { toast('Ошибка отправки'); }
+}
+
+async function claimFree() {
+  haptic('medium');
+  try {
+    const r = await api('/api/free7');
+    if (r.ok) {
+      toast('Выдано 7 дней');
+      ME = await api('/api/me');
+      renderProfile();
+    } else { toast(r.error || 'Недоступно'); }
+  } catch (e) { toast('Ошибка'); }
+}
+
+/* ---------- прочее ---------- */
+function copyRef() {
+  haptic();
+  const link = ME.ref_link || '';
+  if (!link) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link).then(() => toast('Скопировано'));
+  } else { toast(link); }
+}
+
+function switchTab(tab) {
+  haptic();
+  ['profile', 'stats', 'settings', 'control'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+  });
+  document.querySelectorAll('#nav button').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+}
+
+boot();
+</script>
+</body>
+  </html>
