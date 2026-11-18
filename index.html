@@ -57,7 +57,7 @@
       color: var(--label-primary);
       min-height: 100vh;
       overflow-x: hidden;
-      padding-bottom: 104px;
+      padding-bottom: 108px;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -250,6 +250,13 @@
       text-align: center;
     }
 
+    .ios-full-btn.secondary {
+      background: rgba(10, 132, 255, 0.16);
+      color: var(--ios-blue);
+      border: 0.5px solid rgba(10, 132, 255, 0.35);
+      margin-top: 8px;
+    }
+
     .ios-full-btn.destructive {
       background: rgba(255, 69, 58, 0.16);
       color: var(--ios-red);
@@ -313,6 +320,34 @@
 
     .ui-switch.checked::after {
       transform: translateX(20px);
+    }
+
+    /* ОП Карточка (4 Спонсора) */
+    .op-gate-card {
+      border: 1px solid rgba(10, 132, 255, 0.45);
+      background: rgba(10, 132, 255, 0.08);
+    }
+
+    .op-sponsor-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin: 12px 0;
+    }
+
+    .op-sponsor-btn {
+      width: 100%;
+      background: var(--bg-grouped);
+      border: 0.5px solid var(--glass-border);
+      color: var(--label-primary);
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
     }
 
     .tg-chat-frame {
@@ -492,9 +527,9 @@
       border-radius: 12px;
       padding: 12px 14px;
       color: var(--label-primary);
-      font-size: 16px;
+      font-size: 15px;
       outline: none;
-      margin: 10px 0 12px;
+      margin: 8px 0 10px;
     }
 
     .number-input-mini {
@@ -559,13 +594,20 @@
       color: var(--label-secondary);
     }
 
+    .admin-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
     .ios-tabbar {
       position: fixed;
       bottom: 12px;
       left: 50%;
       transform: translateX(-50%);
-      width: calc(100% - 24px);
-      max-width: 436px;
+      width: calc(100% - 20px);
+      max-width: 446px;
       height: 66px;
       background: var(--bg-elevated);
       backdrop-filter: blur(32px) saturate(190%);
@@ -590,15 +632,15 @@
       justify-content: center;
       gap: 3px;
       color: var(--label-secondary);
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 500;
       cursor: pointer;
       transition: color 0.18s ease, background-color 0.18s ease;
     }
 
     .tab-btn svg {
-      width: 20px;
-      height: 20px;
+      width: 19px;
+      height: 19px;
       stroke: currentColor;
       fill: none;
       stroke-width: 1.9;
@@ -658,6 +700,7 @@
       </div>
     </header>
 
+    <!-- ВКЛАДКА 1: ПАНЕЛЬ -->
     <section id="pane-dashboard" class="tab-pane active">
       <div class="ios-card engine-bar">
         <div>
@@ -667,6 +710,19 @@
         </div>
         <button id="engineToggleBtn" class="ios-primary-btn tap-glass" onclick="toggleBotActive()">
           Запустить
+        </button>
+      </div>
+
+      <!-- Блок обязательной подписки на 4 спонсоров (ОП) перед запуском -->
+      <div id="opGateSection" class="ios-card op-gate-card" style="display: none;">
+        <div style="font-size: 16px; font-weight: 700;">Обязательная подписка (4 ОП)</div>
+        <div class="row-caption" style="margin-top: 3px;">
+          Для запуска AutoBot PR GRAM Core подпишитесь на спонсоров ниже и нажмите «Проверить подписку»:
+        </div>
+        <div id="opErrorLabel" style="display: none; color: var(--ios-red); font-size: 12.5px; font-weight: 600; margin-top: 8px;"></div>
+        <div id="opSponsorsList" class="op-sponsor-list"></div>
+        <button id="opVerifyBtn" class="ios-full-btn tap-glass" onclick="verifyOpSubscription()">
+          Проверить подписку
         </button>
       </div>
 
@@ -743,7 +799,7 @@
         <div class="ios-row">
           <div>
             <div class="row-title">Обход бана</div>
-            <div class="row-caption">Имитация чтения чата и набора текста</div>
+            <div class="row-caption">Доступно на тарифе «Средний»</div>
           </div>
           <div id="swBypassBan" class="ui-switch" onclick="toggleBooleanSetting('bypass_ban')"></div>
         </div>
@@ -758,6 +814,7 @@
       </div>
     </section>
 
+    <!-- ВКЛАДКА 2: АККАУНТ -->
     <section id="pane-account" class="tab-pane">
       <div class="ios-group-header">Telegram-сессия</div>
 
@@ -771,12 +828,16 @@
             <span style="font-size: 12px; font-weight: 600; color: var(--ios-green);">Авторизован</span>
           </div>
           <div class="ios-row">
-            <div class="row-title">Устройство сессии</div>
-            <div id="accDeviceModel" style="font-size: 14px; color: var(--ios-blue); font-weight: 500;">—</div>
+            <div class="row-title">Устройство</div>
+            <div id="accDeviceModel" style="font-size: 14px; color: var(--ios-blue); font-weight: 600;">Python</div>
           </div>
           <div class="ios-row">
-            <div class="row-title">Версия системы</div>
-            <div id="accSystemVersion" style="font-size: 14px; color: var(--label-secondary);">—</div>
+            <div class="row-title">ОС</div>
+            <div id="accSystemVersion" style="font-size: 14px; color: var(--label-primary); font-weight: 500;">Python</div>
+          </div>
+          <div class="ios-row">
+            <div class="row-title">Версия</div>
+            <div id="accAppVersion" style="font-size: 14px; color: var(--label-secondary);">1.0.0</div>
           </div>
         </div>
         <button class="ios-full-btn destructive tap-glass" onclick="requestUnbindAccount()">
@@ -789,7 +850,7 @@
 
         <div id="stepPhoneBox">
           <div class="row-title">Привязка аккаунта</div>
-          <div class="row-caption">Вход выполняется с кастомными параметрами устройства.</div>
+          <div class="row-caption">Сессия: Устройство Python · ОС Python · Версия 1.0.0</div>
           <input id="authPhoneField" type="tel" class="ios-input" placeholder="+7 999 123 45 67" />
           <button class="ios-full-btn tap-glass" onclick="triggerSendPhone()">Получить код</button>
         </div>
@@ -831,6 +892,7 @@
       </div>
     </section>
 
+    <!-- ВКЛАДКА 3: ТАРИФЫ -->
     <section id="pane-tariffs" class="tab-pane">
       <div class="ios-group-header">Тарифные планы</div>
 
@@ -844,7 +906,7 @@
           • Подключение 1 аккаунта<br/>
           • Автоматическая архивация чатов
         </div>
-        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('basic')">Выбрать Базовый</button>
+        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('basic')">Купить Базовый (29 ₽)</button>
       </div>
 
       <div id="planCardMedium" class="ios-card">
@@ -858,39 +920,50 @@
           • Умный обход бана (имитация человека)<br/>
           • Автоматический сбор чеков на основной аккаунт
         </div>
-        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('medium')">Выбрать Средний</button>
+        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('medium')">Купить Средний (49 ₽)</button>
       </div>
     </section>
 
+    <!-- ВКЛАДКА 4: ОПЛАТА -->
     <section id="pane-payment" class="tab-pane">
-      <div class="ios-group-header">Оформление подписки</div>
+      <div class="ios-group-header">Оплата через CryptoBot</div>
       <div class="ios-list-card">
         <div class="ios-row" style="flex-direction: column; align-items: stretch;">
-          <div class="row-title">Тарифный план</div>
+          <div class="row-title">Выберите тариф</div>
           <div class="ios-segmented" style="margin-top: 8px;">
             <div id="payOptBasic" class="seg-option tap-glass selected" onclick="selectPayPlan('basic')">Базовый (29 ₽)</div>
             <div id="payOptMedium" class="seg-option tap-glass" onclick="selectPayPlan('medium')">Средний (49 ₽)</div>
           </div>
         </div>
 
-        <div class="ios-row" style="flex-direction: column; align-items: stretch;">
+        <div class="ios-row">
           <div class="row-title">Способ оплаты</div>
-          <div class="ios-segmented" style="margin-top: 8px;">
-            <div id="payWayCrypto" class="seg-option tap-glass selected" onclick="selectPayMethod('cryptobot')">CryptoBot</div>
-            <div id="payWayStars" class="seg-option tap-glass" onclick="selectPayMethod('stars')">TG Stars</div>
-            <div id="payWayCard" class="seg-option tap-glass" onclick="selectPayMethod('card')">Карта</div>
-          </div>
+          <div style="font-size: 15px; font-weight: 600; color: var(--ios-blue);">CryptoBot</div>
         </div>
 
         <div class="ios-row">
-          <div class="row-title">Итого к оплате (30 дней)</div>
-          <div id="paySummaryPrice" style="font-size: 16px; font-weight: 700; color: var(--ios-blue);">29 ₽</div>
+          <div class="row-title">Сумма к оплате (30 дней)</div>
+          <div id="paySummaryPrice" style="font-size: 16px; font-weight: 700; color: var(--ios-green);">29 ₽</div>
         </div>
       </div>
 
-      <button class="ios-full-btn tap-glass" onclick="submitPaymentRequest()">Оформить заявку</button>
+      <div id="payErrorBanner" style="display:none; color: var(--ios-red); font-size: 13px; margin: 4px 6px 10px; font-weight: 500;"></div>
+
+      <button id="createPayBtn" class="ios-full-btn tap-glass" onclick="submitPaymentRequest()">
+        Оплатить в CryptoBot
+      </button>
+
+      <div id="activeInvoiceBox" style="display: none; margin-top: 10px;">
+        <button class="ios-full-btn tap-glass" style="background: var(--ios-green);" onclick="openCurrentInvoiceUrl()">
+          Открыть счет в CryptoBot
+        </button>
+        <button class="ios-full-btn secondary tap-glass" onclick="checkCurrentInvoiceStatus()">
+          Проверить оплату
+        </button>
+      </div>
     </section>
 
+    <!-- ВКЛАДКА 5: ИНФО -->
     <section id="pane-info" class="tab-pane">
       <div class="ios-group-header">Инфо</div>
       <div class="ios-list-card">
@@ -905,6 +978,69 @@
         <div class="ios-row">
           <div class="row-title">ТГК:</div>
           <span class="info-link tap-glass" onclick="openExternal('https://t.me/Lucid_Company')">@Lucid_Company</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ВКЛАДКА 6: АДМИН ПАНЕЛЬ (ТОЛЬКО ДЛЯ ADMIN_ID) -->
+    <section id="pane-admin" class="tab-pane">
+      <div class="ios-group-header">Статус выполнения команды</div>
+      <div class="ios-card">
+        <div id="admStatusText" style="font-size: 13.5px; font-weight: 600; color: var(--ios-blue);">Готов к работе</div>
+      </div>
+
+      <div class="ios-group-header">Рассылки (/pokaz и /rs)</div>
+      <div class="ios-card">
+        <button class="ios-full-btn tap-glass" onclick="sendAdminCmd({ action: 'pokaz' })">
+          Запустить рассылку показов (/pokaz)
+        </button>
+        <input id="admRsText" type="text" class="ios-input" placeholder="Текст рассылки для всех пользователей..." />
+        <button class="ios-full-btn secondary tap-glass" onclick="triggerAdminRs()">
+          Отправить рассылку (/rs)
+        </button>
+      </div>
+
+      <div class="ios-group-header">Технические работы (/tr и /troff)</div>
+      <div class="ios-card">
+        <input id="admTrText" type="text" class="ios-input" placeholder="Текст под заголовком техработ..." />
+        <div class="admin-btn-grid">
+          <button class="ios-full-btn tap-glass" onclick="triggerAdminTrOn()">Включить (/tr)</button>
+          <button class="ios-full-btn destructive tap-glass" onclick="sendAdminCmd({ action: 'tr_off' })">Выключить (/troff)</button>
+        </div>
+      </div>
+
+      <div class="ios-group-header">Создать промокод (/newcode)</div>
+      <div class="ios-card">
+        <input id="admCodeName" type="text" class="ios-input" placeholder="Название кода (например: bonus)" />
+        <div class="ios-segmented" style="margin-bottom: 8px;">
+          <div id="admCodeBasic" class="seg-option selected" onclick="selectAdmCodeTariff('basic')">Базовый</div>
+          <div id="admCodeMedium" class="seg-option" onclick="selectAdmCodeTariff('medium')">Средний</div>
+        </div>
+        <input id="admCodeDays" type="number" class="ios-input" placeholder="Количество дней (например: 10)" value="10" />
+        <button class="ios-full-btn tap-glass" onclick="triggerAdminNewCode()">Создать код</button>
+      </div>
+
+      <div class="ios-group-header">Управление пользователем (/edit ID)</div>
+      <div class="ios-card">
+        <input id="admTargetId" type="number" class="ios-input" placeholder="Telegram ID пользователя" />
+        <div class="admin-btn-grid">
+          <button class="ios-full-btn tap-glass" onclick="triggerAdminEdit('give_basic')">Дать Базовый (30д)</button>
+          <button class="ios-full-btn tap-glass" style="background: var(--ios-green);" onclick="triggerAdminEdit('give_medium')">Дать Средний (30д)</button>
+          <button class="ios-full-btn secondary tap-glass" onclick="triggerAdminEdit('take_tariff')">Отобрать тариф</button>
+          <button class="ios-full-btn destructive tap-glass" onclick="triggerAdminEdit('ban')">Забанить</button>
+        </div>
+        <button class="ios-full-btn secondary tap-glass" style="margin-top: 8px;" onclick="triggerAdminEdit('unban')">
+          Разбанить пользователя
+        </button>
+      </div>
+
+      <div class="ios-group-header">Все пользователи (/info)</div>
+      <div class="ios-card">
+        <button class="ios-full-btn secondary tap-glass" style="margin-top:0; margin-bottom:10px;" onclick="sendAdminCmd({ action: 'refresh_info' })">
+          Обновить список (/info)
+        </button>
+        <div id="admUsersConsole" class="logs-console" style="height: 220px;">
+          Загрузка списка пользователей...
         </div>
       </div>
     </section>
@@ -931,11 +1067,15 @@
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
       <span>Инфо</span>
     </div>
+    <div id="adminTabBtn" class="tab-btn tap-glass" style="display: none;" onclick="switchPane('admin', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span>Админ панель</span>
+    </div>
   </nav>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, onValue, update, set, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const storageConfig = {
       databaseURL: "https://autobotbd-62b2d-default-rtdb.firebaseio.com"
@@ -943,6 +1083,8 @@
 
     const app = initializeApp(storageConfig);
     const db = getDatabase(app);
+
+    const ADMIN_ID = 8932533956;
 
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     if (tg) {
@@ -959,14 +1101,19 @@
       first_name: "Эльдар"
     };
 
-    const USER_ID = tgUser.id;
+    const USER_ID = Number(tgUser.id);
     document.getElementById("userHeaderSub").textContent = `@${tgUser.username || "user"} · ID ${USER_ID}`;
     document.getElementById("infoUidLabel").textContent = String(USER_ID);
+
+    if (USER_ID === ADMIN_ID) {
+      document.getElementById("adminTabBtn").style.display = "flex";
+    }
 
     let localUser = {
       created_at: Math.floor(Date.now() / 1000),
       bot_active: false,
       tariff: "none",
+      tariff_until: 0,
       settings: {
         target_bot: "gram_prbot",
         targets: "channels",
@@ -977,12 +1124,15 @@
         delay_max: 14
       },
       account: { authorized: false },
-      auth_flow: { step: "idle" }
+      auth_flow: { step: "idle" },
+      op_flow: { status: "idle", sponsors: [] },
+      payment_flow: { status: "idle", pay_url: "", invoice_id: 0 }
     };
 
     let pinBuffer = "";
     let selectedPlan = "basic";
-    let selectedMethod = "cryptobot";
+    let admCodeTariff = "basic";
+    let lastOpenedInvoiceId = 0;
 
     function haptic(style = "light") {
       try {
@@ -997,7 +1147,7 @@
       const el = document.getElementById("toast");
       el.textContent = msg;
       el.classList.add("visible");
-      setTimeout(() => el.classList.remove("visible"), 2000);
+      setTimeout(() => el.classList.remove("visible"), 2200);
     }
 
     function escapeHtml(s) {
@@ -1005,6 +1155,14 @@
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
+    }
+
+    function hasActiveTariff() {
+      const t = localUser.tariff || "none";
+      const until = Number(localUser.tariff_until || 0);
+      if (t !== "basic" && t !== "medium") return false;
+      if (until > 0 && until < Date.now() / 1000) return false;
+      return true;
     }
 
     const connRef = ref(db, ".info/connected");
@@ -1026,9 +1184,17 @@
           tariff: "none",
           tariff_until: 0,
           bot_active: false,
+          start_request: false,
           settings: localUser.settings,
-          account: { authorized: false },
-          auth_flow: { step: "idle" }
+          account: {
+            authorized: false,
+            device_model: "Python",
+            system_version: "Python",
+            app_version: "1.0.0"
+          },
+          auth_flow: { step: "idle" },
+          op_flow: { status: "idle", sponsors: [] },
+          payment_flow: { status: "idle", invoice_id: 0, pay_url: "" }
         };
         set(userRef, initPayload);
         return;
@@ -1043,13 +1209,39 @@
         ...val,
         settings: { ...localUser.settings, ...(val.settings || {}) },
         account: { ...(val.account || {}) },
-        auth_flow: { ...(val.auth_flow || {}) }
+        auth_flow: { ...(val.auth_flow || {}) },
+        op_flow: { ...(val.op_flow || {}) },
+        payment_flow: { ...(val.payment_flow || {}) }
       };
       renderAll();
     });
 
+    if (USER_ID === ADMIN_ID) {
+      const admRef = ref(db, "admin_control");
+      onValue(admRef, (snap) => {
+        const adm = snap.val() || {};
+        const cmd = adm.command || {};
+        document.getElementById("admStatusText").textContent = cmd.message
+          ? `[${cmd.status || "info"}] ${cmd.message}`
+          : "Готов к выполнению команд";
+
+        const summary = Array.isArray(adm.summary) ? adm.summary : Object.values(adm.summary || {});
+        const box = document.getElementById("admUsersConsole");
+        if (!summary.length) {
+          box.textContent = "Нет данных. Нажмите «Обновить список (/info)».";
+        } else {
+          box.innerHTML = summary.map((u) => {
+            const st = u.banned ? "Бан" : (u.bot_active ? "Работает" : "Стоп");
+            return `<div class="log-row">ID: <b>${escapeHtml(u.user_id)}</b> | @${escapeHtml(u.username || "нет")} | Тариф: ${escapeHtml(u.tariff)} | ${st} | Тел: ${escapeHtml(u.phone)}</div>`;
+          }).join("");
+        }
+      });
+    }
+
     function renderAll() {
-      const isRun = Boolean(localUser.bot_active);
+      const activeTariff = hasActiveTariff();
+      const isRun = Boolean(localUser.bot_active) && activeTariff;
+
       const ind = document.getElementById("engineIndicator");
       const btn = document.getElementById("engineToggleBtn");
       ind.textContent = isRun ? "Работает" : "Остановлен";
@@ -1057,8 +1249,13 @@
       btn.textContent = isRun ? "Остановить" : "Запустить";
       btn.classList.toggle("stop", isRun);
 
-      const tMap = { none: "Не активен", basic: "Базовый", medium: "Средний" };
-      document.getElementById("engineSubMeta").textContent = `Тариф: ${tMap[localUser.tariff] || localUser.tariff}`;
+      const tMap = { none: "Не куплен (Нажмите «Тарифы»)", basic: "Базовый", medium: "Средний" };
+      const remDays = activeTariff ? Math.max(0, Math.ceil((Number(localUser.tariff_until) - Date.now() / 1000) / 86400)) : 0;
+      document.getElementById("engineSubMeta").textContent = activeTariff
+        ? `Тариф: ${tMap[localUser.tariff]} (осталось ${remDays} дн.)`
+        : `Тариф: ${tMap.none}`;
+
+      renderOpGate(localUser.op_flow || {}, isRun);
 
       document.getElementById("liveBroadcastSection").style.display = isRun ? "block" : "none";
 
@@ -1086,6 +1283,74 @@
       renderLiveScreen1to1(localUser.screen || {});
       renderLogsStream(localUser.logs || []);
       renderAccountSection(localUser.account || {}, localUser.auth_flow || {});
+      renderPaymentSection(localUser.payment_flow || {});
+    }
+
+    function renderOpGate(opFlow, isRun) {
+      const gateBox = document.getElementById("opGateSection");
+      const listEl = document.getElementById("opSponsorsList");
+      const errEl = document.getElementById("opErrorLabel");
+      const verifyBtn = document.getElementById("opVerifyBtn");
+
+      if (isRun || (opFlow.status !== "need_op" && opFlow.status !== "checking")) {
+        gateBox.style.display = "none";
+        return;
+      }
+
+      gateBox.style.display = "block";
+      if (opFlow.error) {
+        errEl.style.display = "block";
+        errEl.textContent = opFlow.error;
+      } else {
+        errEl.style.display = "none";
+      }
+
+      verifyBtn.textContent = opFlow.status === "checking" ? "Проверка подписки..." : "Проверить подписку";
+      verifyBtn.disabled = opFlow.status === "checking";
+
+      const sponsors = Array.isArray(opFlow.sponsors) ? opFlow.sponsors : Object.values(opFlow.sponsors || {});
+      listEl.innerHTML = "";
+      sponsors.forEach((sp) => {
+        const b = document.createElement("button");
+        b.className = "op-sponsor-btn tap-glass";
+        b.innerHTML = `<span>${escapeHtml(sp.title || "Спонсор")}</span><span style="color:var(--ios-blue);">Подписаться ↗</span>`;
+        b.onclick = () => openExternal(sp.url);
+        listEl.appendChild(b);
+      });
+    }
+
+    function renderPaymentSection(pf) {
+      const createBtn = document.getElementById("createPayBtn");
+      const invBox = document.getElementById("activeInvoiceBox");
+      const errBanner = document.getElementById("payErrorBanner");
+
+      if (pf.error) {
+        errBanner.style.display = "block";
+        errBanner.textContent = pf.error;
+      } else {
+        errBanner.style.display = "none";
+      }
+
+      if (pf.status === "creating" || pf.status === "processing") {
+        createBtn.textContent = "Создание счета в CryptoBot...";
+        createBtn.disabled = true;
+      } else {
+        createBtn.textContent = "Создать новый счет в CryptoBot";
+        createBtn.disabled = false;
+      }
+
+      if (pf.status === "ready" && pf.pay_url) {
+        invBox.style.display = "block";
+        if (pf.invoice_id && pf.invoice_id !== lastOpenedInvoiceId) {
+          lastOpenedInvoiceId = pf.invoice_id;
+          notifyToast("Счет создан! Открываю CryptoBot...");
+          openExternal(pf.pay_url);
+        }
+      } else if (pf.status === "paid") {
+        invBox.style.display = "none";
+      } else {
+        invBox.style.display = pf.pay_url ? "block" : "none";
+      }
     }
 
     function renderLiveScreen1to1(scr) {
@@ -1135,18 +1400,6 @@
           });
           kbContainer.appendChild(rowDiv);
         });
-      } else if (Array.isArray(scr.buttons) && scr.buttons.length > 0) {
-        for (let i = 0; i < scr.buttons.length; i += 2) {
-          const rowDiv = document.createElement("div");
-          rowDiv.className = "tg-kb-row";
-          scr.buttons.slice(i, i + 2).forEach((bText) => {
-            const b = document.createElement("div");
-            b.className = "tg-kb-btn" + (scr.pressed === bText ? " pressed-now" : "");
-            b.textContent = bText;
-            rowDiv.appendChild(b);
-          });
-          kbContainer.appendChild(rowDiv);
-        }
       }
     }
 
@@ -1170,8 +1423,9 @@
       if (isAuth) {
         document.getElementById("accProfileName").textContent = acc.name || "Telegram Аккаунт";
         document.getElementById("accProfileMeta").textContent = `${acc.phone || ""} · @${acc.username || "user"}`;
-        document.getElementById("accDeviceModel").textContent = acc.device_model || "Холодильник";
-        document.getElementById("accSystemVersion").textContent = acc.system_version || "Розетка 220В";
+        document.getElementById("accDeviceModel").textContent = "Python";
+        document.getElementById("accSystemVersion").textContent = "Python";
+        document.getElementById("accAppVersion").textContent = "1.0.0";
         return;
       }
 
@@ -1207,29 +1461,82 @@
 
     window.toggleBotActive = function() {
       haptic("medium");
-      if (!localUser.bot_active && !localUser.account.authorized) {
-        haptic("error");
-        notifyToast("Сначала привяжите аккаунт");
+      if (!localUser.bot_active) {
+        if (!hasActiveTariff()) {
+          haptic("error");
+          notifyToast("Купите тариф для запуска бота!");
+          const tabs = document.querySelectorAll(".tab-btn");
+          switchPane("tariffs", tabs[2]);
+          return;
+        }
+        if (!localUser.account.authorized) {
+          haptic("error");
+          notifyToast("Сначала привяжите аккаунт!");
+          const tabs = document.querySelectorAll(".tab-btn");
+          switchPane("account", tabs[1]);
+          return;
+        }
+        notifyToast("Проверка 4 ОП спонсоров...");
+        update(ref(db, `users/${USER_ID}`), { start_request: true });
         return;
       }
-      const next = !localUser.bot_active;
-      update(ref(db, `users/${USER_ID}`), { bot_active: next });
-      notifyToast(next ? "Автобот запущен" : "Автобот остановлен");
+      update(ref(db, `users/${USER_ID}`), { bot_active: false, start_request: false });
+      update(ref(db, `users/${USER_ID}/op_flow`), { status: "idle" });
+      notifyToast("Автобот остановлен");
+    };
+
+    window.verifyOpSubscription = function() {
+      haptic("medium");
+      notifyToast("Проверяю подписку на спонсоров...");
+      update(ref(db, `users/${USER_ID}/op_flow`), {
+        status: "checking",
+        error: "",
+        updated_at: Date.now()
+      });
     };
 
     window.updateSetting = function(key, val) {
+      if (!hasActiveTariff()) {
+        haptic("error");
+        notifyToast("Сначала приобретите тариф!");
+        const tabs = document.querySelectorAll(".tab-btn");
+        switchPane("tariffs", tabs[2]);
+        return;
+      }
+      if (key === "targets" && val === "views" && localUser.tariff !== "medium") {
+        haptic("error");
+        notifyToast("«Просмотры» доступны только на тарифе Средний!");
+        return;
+      }
       haptic("selection");
       update(ref(db, `users/${USER_ID}/settings`), { [key]: val });
       notifyToast("Сохранено");
     };
 
     window.toggleBooleanSetting = function(key) {
+      if (!hasActiveTariff()) {
+        haptic("error");
+        notifyToast("Сначала приобретите тариф!");
+        const tabs = document.querySelectorAll(".tab-btn");
+        switchPane("tariffs", tabs[2]);
+        return;
+      }
+      if (key === "bypass_ban" && localUser.tariff !== "medium") {
+        haptic("error");
+        notifyToast("Обход бана доступен только на тарифе Средний!");
+        return;
+      }
       haptic("selection");
       const next = !localUser.settings[key];
       update(ref(db, `users/${USER_ID}/settings`), { [key]: next });
     };
 
     window.saveDelayRange = function() {
+      if (!hasActiveTariff()) {
+        haptic("error");
+        notifyToast("Сначала приобретите тариф!");
+        return;
+      }
       const dMin = Math.max(2, Number(document.getElementById("inputDelayMin").value || 10));
       const dMax = Math.max(dMin + 1, Number(document.getElementById("inputDelayMax").value || 14));
       update(ref(db, `users/${USER_ID}/settings`), { delay_min: dMin, delay_max: dMax });
@@ -1334,26 +1641,94 @@
       document.getElementById("paySummaryPrice").textContent = plan === "basic" ? "29 ₽" : "49 ₽";
     };
 
-    window.selectPayMethod = function(m) {
-      haptic("selection");
-      selectedMethod = m;
-      document.getElementById("payWayCrypto").classList.toggle("selected", m === "cryptobot");
-      document.getElementById("payWayStars").classList.toggle("selected", m === "stars");
-      document.getElementById("payWayCard").classList.toggle("selected", m === "card");
+    window.submitPaymentRequest = function() {
+      haptic("medium");
+      notifyToast("Создаю счет в CryptoBot...");
+      update(ref(db, `users/${USER_ID}/payment_flow`), {
+        status: "creating",
+        tariff: selectedPlan,
+        amount: selectedPlan === "basic" ? 29 : 49,
+        error: "",
+        updated_at: Date.now()
+      });
     };
 
-    window.submitPaymentRequest = function() {
-      haptic("success");
-      const ordersRef = ref(db, `payment_orders/${USER_ID}`);
-      push(ordersRef, {
-        user_id: USER_ID,
-        tariff: selectedPlan,
-        method: selectedMethod,
-        amount: selectedPlan === "basic" ? 29 : 49,
-        created_at: Date.now()
+    window.openCurrentInvoiceUrl = function() {
+      haptic("light");
+      const url = localUser.payment_flow && localUser.payment_flow.pay_url;
+      if (url) {
+        openExternal(url);
+      } else {
+        notifyToast("Сначала создайте счет");
+      }
+    };
+
+    window.checkCurrentInvoiceStatus = function() {
+      haptic("medium");
+      if (!localUser.payment_flow || !localUser.payment_flow.invoice_id) {
+        notifyToast("Счет не найден");
+        return;
+      }
+      notifyToast("Проверяю оплату...");
+      update(ref(db, `users/${USER_ID}/payment_flow`), {
+        status: "check",
+        updated_at: Date.now()
       });
-      notifyToast("Заявка создана. Переход в бота...");
-      setTimeout(() => openExternal("https://t.me/autobotpiarbot"), 700);
+    };
+
+    /* АДМИН-ФУНКЦИИ */
+    window.sendAdminCmd = function(payload) {
+      if (USER_ID !== ADMIN_ID) return;
+      haptic("medium");
+      update(ref(db, "admin_control/command"), {
+        ...payload,
+        status: "pending",
+        message: "Отправлено в бот...",
+        updated_at: Date.now()
+      });
+      notifyToast("Команда отправлена");
+    };
+
+    window.triggerAdminRs = function() {
+      const txt = document.getElementById("admRsText").value.trim();
+      if (!txt) {
+        notifyToast("Введите текст рассылки");
+        return;
+      }
+      sendAdminCmd({ action: "rs", text: txt });
+      document.getElementById("admRsText").value = "";
+    };
+
+    window.triggerAdminTrOn = function() {
+      const txt = document.getElementById("admTrText").value.trim() || "Ведутся плановые работы по обновлению системы.";
+      sendAdminCmd({ action: "tr_on", text: txt });
+    };
+
+    window.selectAdmCodeTariff = function(t) {
+      haptic("selection");
+      admCodeTariff = t;
+      document.getElementById("admCodeBasic").classList.toggle("selected", t === "basic");
+      document.getElementById("admCodeMedium").classList.toggle("selected", t === "medium");
+    };
+
+    window.triggerAdminNewCode = function() {
+      const code = document.getElementById("admCodeName").value.trim().toLowerCase();
+      const days = Number(document.getElementById("admCodeDays").value || 5);
+      if (!code) {
+        notifyToast("Введите название кода");
+        return;
+      }
+      sendAdminCmd({ action: "newcode", code: code, tariff: admCodeTariff, days: days });
+      document.getElementById("admCodeName").value = "";
+    };
+
+    window.triggerAdminEdit = function(subOp) {
+      const tid = Number(document.getElementById("admTargetId").value);
+      if (!tid) {
+        notifyToast("Введите Telegram ID пользователя");
+        return;
+      }
+      sendAdminCmd({ action: "edit_user", target_id: tid, sub_op: subOp });
     };
 
     window.openExternal = function(url) {
