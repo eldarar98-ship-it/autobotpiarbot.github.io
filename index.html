@@ -1,477 +1,1381 @@
 <!DOCTYPE html>
-<!-- language: HTML5, file: index.html, deploy: GitHub Pages (статика) -->
-<!-- В API_BASE ниже подставь адрес своего бэкенда (Termux: http://<ip>:8000 или домен с https) -->
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AutoBot PR GRAM</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  :root { color-scheme: light dark; }
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-  body {
-    background: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    font-size: 17px;
-    min-height: 100vh;
-    padding-bottom: 90px;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .hidden { display: none !important; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>AutoBot PR GRAM Core</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-base: #000000;
+      --bg-elevated: rgba(28, 28, 30, 0.72);
+      --bg-grouped: rgba(44, 44, 46, 0.55);
+      --separator: rgba(255, 255, 255, 0.11);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --label-primary: #FFFFFF;
+      --label-secondary: rgba(235, 235, 245, 0.6);
+      --label-tertiary: rgba(235, 235, 245, 0.35);
+      --ios-blue: #0A84FF;
+      --ios-green: #30D158;
+      --ios-red: #FF453A;
+      --ios-orange: #FF9F0A;
+      --tg-chat-bg: #0E1621;
+      --tg-bubble-in: #182533;
+      --tg-btn-bg: rgba(43, 82, 120, 0.48);
+      --tg-btn-active: #2B5278;
+    }
 
-  /* экраны-заглушки */
-  #screen-block {
-    position: fixed; inset: 0; z-index: 100;
-    background: var(--tg-theme-bg-color);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 32px;
-  }
-  #screen-block .icon { font-size: 48px; margin-bottom: 20px; }
-  #screen-block .title { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
-  #screen-block .text {
-    color: var(--tg-theme-hint-color); font-size: 15px; line-height: 1.55;
-    max-width: 320px;
-  }
-  #screen-block .text b { color: var(--tg-theme-text-color); }
+    body.light-theme {
+      --bg-base: #F2F2F7;
+      --bg-elevated: rgba(255, 255, 255, 0.78);
+      --bg-grouped: rgba(120, 120, 128, 0.12);
+      --separator: rgba(60, 60, 67, 0.14);
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --label-primary: #000000;
+      --label-secondary: rgba(60, 60, 67, 0.6);
+      --label-tertiary: rgba(60, 60, 67, 0.35);
+      --ios-blue: #007AFF;
+      --ios-green: #34C759;
+      --ios-red: #FF3B30;
+      --tg-chat-bg: #728AA1;
+      --tg-bubble-in: #FFFFFF;
+      --tg-btn-bg: rgba(0, 0, 0, 0.28);
+      --tg-btn-active: rgba(0, 122, 255, 0.75);
+    }
 
-  /* общий каркас */
-  .container { max-width: 560px; margin: 0 auto; padding: 16px; }
-  .card {
-    background: var(--tg-theme-secondary-bg-color);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 12px;
-  }
-  .card-title { font-size: 13px; color: var(--tg-theme-hint-color); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px; }
-  .row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
-  .row + .row { border-top: 1px solid var(--tg-theme-section-separator-color, rgba(128,128,128,.15)); }
-  .row .label { font-size: 16px; }
-  .row .value { font-size: 16px; color: var(--tg-theme-hint-color); text-align: right; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
 
-  /* профиль */
-  .profile-head { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
-  .avatar {
-    width: 64px; height: 64px; border-radius: 50%;
-    background: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px; font-weight: 600; flex-shrink: 0;
-  }
-  .profile-name { font-size: 20px; font-weight: 600; }
-  .profile-sub { color: var(--tg-theme-hint-color); font-size: 14px; margin-top: 3px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+      background-color: var(--bg-base);
+      color: var(--label-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 104px;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  .pill {
-    display: inline-block; padding: 5px 12px; border-radius: 20px;
-    font-size: 13px; font-weight: 600;
-  }
-  .pill.ok { background: rgba(76,175,80,.15); color: #4caf50; }
-  .pill.off { background: rgba(128,128,128,.15); color: var(--tg-theme-hint-color); }
+    .ambient-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 15% 8%, rgba(10, 132, 255, 0.14), transparent 48%),
+        radial-gradient(circle at 85% 82%, rgba(48, 209, 88, 0.09), transparent 50%);
+      pointer-events: none;
+    }
 
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .stat-card {
-    background: var(--tg-theme-secondary-bg-color);
-    border-radius: 16px; padding: 20px;
-  }
-  .stat-num { font-size: 28px; font-weight: 700; }
-  .stat-label { font-size: 13px; color: var(--tg-theme-hint-color); margin-top: 4px; }
+    .viewport {
+      max-width: 460px;
+      margin: 0 auto;
+      padding: 12px 16px 24px;
+      transition: filter 0.26s cubic-bezier(0.32, 0.72, 0, 1), transform 0.26s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.22s ease;
+    }
 
-  /* формы настроек */
-  input[type="text"], input[type="number"] {
-    background: var(--tg-theme-bg-color);
-    border: 1px solid var(--tg-theme-section-separator-color, rgba(128,128,128,.25));
-    color: var(--tg-theme-text-color);
-    border-radius: 12px; padding: 12px 16px;
-    font-size: 16px; width: 110px; text-align: right; outline: none;
-  }
-  .seg { display: flex; background: var(--tg-theme-bg-color); border-radius: 12px; padding: 3px; }
-  .seg button {
-    flex: 1; border: none; background: transparent; color: var(--tg-theme-hint-color);
-    padding: 9px 14px; border-radius: 10px; font-size: 15px; cursor: pointer;
-  }
-  .seg button.active { background: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); }
+    .viewport.blur-switching {
+      filter: blur(14px);
+      transform: scale(0.98);
+      opacity: 0.55;
+    }
 
-  /* переключатель */
-  .switch { position: relative; width: 52px; height: 30px; flex-shrink: 0; cursor: pointer; }
-  .switch input { display: none; }
-  .switch .track {
-    position: absolute; inset: 0; border-radius: 15px;
-    background: var(--tg-theme-section-separator-color, rgba(128,128,128,.3));
-    transition: background .2s;
-  }
-  .switch .knob {
-    position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
-    border-radius: 50%; background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,.25);
-    transition: transform .2s;
-  }
-  .switch input:checked + .track { background: var(--tg-theme-button-color); }
-  .switch input:checked + .track + .knob { transform: translateX(22px); }
+    .tap-glass {
+      transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), filter 0.16s ease, opacity 0.16s ease;
+    }
 
-  /* главные кнопки */
-  .btn {
-    display: block; width: 100%;
-    background: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    border: none; border-radius: 14px;
-    padding: 16px; font-size: 17px; font-weight: 600; cursor: pointer;
-  }
-  .btn.secondary {
-    background: transparent;
-    color: var(--tg-theme-link-color, #2481cc);
-    border: 1.5px solid var(--tg-theme-link-color, #2481cc);
-  }
-  .btn:active { opacity: .75; }
-  .btn-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .tap-glass:active {
+      transform: scale(0.97);
+      filter: blur(0.8px);
+      opacity: 0.85;
+    }
 
-  /* нижняя навигация */
-  #nav {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-    background: var(--tg-theme-bg-color);
-    border-top: 1px solid var(--tg-theme-section-separator-color, rgba(128,128,128,.15));
-    display: flex; padding: 8px 0 env(safe-area-inset-bottom);
-  }
-  #nav button {
-    flex: 1; background: none; border: none; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    color: var(--tg-theme-hint-color); font-size: 11px; padding: 6px 0;
-  }
-  #nav button .nav-ic { font-size: 22px; line-height: 1; }
-  #nav button.active { color: var(--tg-theme-link-color, #2481cc); }
+    /* Навигационный бар iOS */
+    .ios-navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 4px 14px;
+    }
 
-  /* тост */
-  #toast {
-    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--tg-theme-text-color); color: var(--tg-theme-bg-color);
-    padding: 10px 22px; border-radius: 22px; font-size: 14px; font-weight: 500;
-    opacity: 0; transition: all .25s; z-index: 200; pointer-events: none;
-    max-width: 85vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .nav-large-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
 
-  .section-h { font-size: 15px; font-weight: 600; color: var(--tg-theme-hint-color); margin: 20px 4px 10px; }
-</style>
+    .nav-subtitle {
+      font-size: 12px;
+      color: var(--label-secondary);
+      margin-top: 1px;
+    }
+
+    .conn-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: var(--bg-elevated);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 0.5px solid var(--glass-border);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--label-secondary);
+    }
+
+    .conn-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ios-green);
+    }
+
+    .conn-dot.offline {
+      background: var(--ios-red);
+    }
+
+    /* Секции и карточки */
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    .ios-group-header {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--label-secondary);
+      margin: 16px 14px 7px;
+    }
+
+    .ios-card {
+      background: var(--bg-elevated);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+
+    .ios-list-card {
+      background: var(--bg-elevated);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 18px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .ios-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 16px;
+      border-bottom: 0.5px solid var(--separator);
+      gap: 12px;
+    }
+
+    .ios-row:last-child {
+      border-bottom: none;
+    }
+
+    .row-title {
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.2px;
+    }
+
+    .row-caption {
+      font-size: 12px;
+      color: var(--label-secondary);
+      margin-top: 2px;
+    }
+
+    /* Главная карточка статуса */
+    .engine-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .state-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--label-secondary);
+      margin-bottom: 4px;
+    }
+
+    .state-indicator.on {
+      color: var(--ios-green);
+    }
+
+    .ios-primary-btn {
+      background: var(--ios-blue);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 14px;
+      padding: 11px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .ios-primary-btn.stop {
+      background: var(--ios-red);
+    }
+
+    .ios-full-btn {
+      width: 100%;
+      background: var(--ios-blue);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .ios-full-btn.destructive {
+      background: rgba(255, 69, 58, 0.16);
+      color: var(--ios-red);
+      border: 0.5px solid rgba(255, 69, 58, 0.35);
+    }
+
+    /* UISegmentedControl */
+    .ios-segmented {
+      display: flex;
+      background: var(--bg-grouped);
+      padding: 3px;
+      border-radius: 11px;
+      gap: 3px;
+    }
+
+    .seg-option {
+      flex: 1;
+      text-align: center;
+      padding: 7px 8px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 9px;
+      color: var(--label-secondary);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .seg-option.selected {
+      background: var(--bg-elevated);
+      color: var(--label-primary);
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    }
+
+    /* UISwitch */
+    .ui-switch {
+      position: relative;
+      width: 51px;
+      height: 31px;
+      border-radius: 999px;
+      background: rgba(120, 120, 128, 0.32);
+      cursor: pointer;
+      transition: background-color 0.22s ease;
+      flex-shrink: 0;
+    }
+
+    .ui-switch.checked {
+      background: var(--ios-green);
+    }
+
+    .ui-switch::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.28);
+      transition: transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ui-switch.checked::after {
+      transform: translateX(20px);
+    }
+
+    /* ТОЧНАЯ РЕПЛИКА ЭКРАНА ЧАТА TELEGRAM (1:1 LIVE SCREEN) */
+    .tg-chat-frame {
+      background: var(--tg-chat-bg);
+      border-radius: 16px;
+      border: 0.5px solid var(--glass-border);
+      overflow: hidden;
+    }
+
+    .tg-chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 13px;
+      background: rgba(24, 37, 51, 0.92);
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .tg-avatar-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #2B5278;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tg-header-info {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .tg-header-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #FFFFFF;
+    }
+
+    .tg-header-sub {
+      font-size: 11px;
+      color: #64B5EF;
+    }
+
+    .tg-chat-viewport {
+      padding: 12px;
+      min-height: 120px;
+    }
+
+    .tg-msg-bubble {
+      background: var(--tg-bubble-in);
+      color: var(--label-primary);
+      border-radius: 14px 14px 14px 4px;
+      padding: 9px 12px 7px;
+      font-size: 13.5px;
+      line-height: 1.42;
+      position: relative;
+      word-wrap: break-word;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+
+    .tg-fwd-header {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64B5EF;
+      border-left: 2px solid #64B5EF;
+      padding-left: 7px;
+      margin-bottom: 5px;
+    }
+
+    .tg-media-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(100, 181, 239, 0.16);
+      color: #64B5EF;
+      margin-bottom: 6px;
+    }
+
+    .tg-msg-text {
+      white-space: pre-wrap;
+      user-select: text;
+    }
+
+    .tg-msg-meta {
+      text-align: right;
+      font-size: 10.5px;
+      color: rgba(255, 255, 255, 0.45);
+      margin-top: 4px;
+    }
+
+    .tg-inline-keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 5px;
+    }
+
+    .tg-kb-row {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+    }
+
+    .tg-kb-btn {
+      flex: 1;
+      background: var(--tg-btn-bg);
+      backdrop-filter: blur(12px);
+      color: #FFFFFF;
+      border-radius: 8px;
+      padding: 8px 6px;
+      font-size: 12.5px;
+      font-weight: 500;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border: 0.5px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.2s ease;
+    }
+
+    .tg-kb-btn .link-arrow {
+      position: absolute;
+      top: 3px;
+      right: 5px;
+      font-size: 9px;
+      opacity: 0.65;
+    }
+
+    .tg-kb-btn.pressed-now {
+      background: var(--ios-blue);
+      border-color: rgba(255, 255, 255, 0.55);
+      box-shadow: 0 0 14px rgba(10, 132, 255, 0.7);
+      font-weight: 600;
+      animation: btnTapPulse 0.85s infinite alternate ease-in-out;
+    }
+
+    @keyframes btnTapPulse {
+      0% { transform: scale(0.98); }
+      100% { transform: scale(1); }
+    }
+
+    /* Окно логов */
+    .logs-console {
+      background: rgba(12, 12, 14, 0.82);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      height: 165px;
+      overflow-y: auto;
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 11.5px;
+      line-height: 1.48;
+      color: #D1D1D6;
+    }
+
+    .log-row {
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .log-time {
+      color: var(--ios-blue);
+      margin-right: 6px;
+    }
+
+    /* Поля ввода и Пин-пад */
+    .ios-input {
+      width: 100%;
+      background: var(--bg-grouped);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--label-primary);
+      font-size: 16px;
+      outline: none;
+      margin: 10px 0 12px;
+    }
+
+    .number-input-mini {
+      width: 66px;
+      background: var(--bg-grouped);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 9px;
+      padding: 6px 8px;
+      color: var(--label-primary);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+    }
+
+    .pin-boxes {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      margin: 14px 0 18px;
+    }
+
+    .pin-cell {
+      width: 46px;
+      height: 54px;
+      border-radius: 13px;
+      background: var(--bg-grouped);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .pin-cell.active {
+      border-color: var(--ios-blue);
+    }
+
+    .ios-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+    }
+
+    .key-btn {
+      height: 52px;
+      border-radius: 14px;
+      background: var(--bg-grouped);
+      border: 0.5px solid var(--glass-border);
+      color: var(--label-primary);
+      font-size: 20px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .key-btn.sub {
+      font-size: 13px;
+      color: var(--label-secondary);
+    }
+
+    /* Нижний таб-бар iOS 26 */
+    .ios-tabbar {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      max-width: 436px;
+      height: 66px;
+      background: var(--bg-elevated);
+      backdrop-filter: blur(32px) saturate(190%);
+      -webkit-backdrop-filter: blur(32px) saturate(190%);
+      border: 0.5px solid var(--glass-border);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 4px;
+      z-index: 99;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .tab-btn {
+      flex: 1;
+      height: 100%;
+      border-radius: 17px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--label-secondary);
+      font-size: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.18s ease, background-color 0.18s ease;
+    }
+
+    .tab-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .tab-btn.active {
+      color: var(--ios-blue);
+      background: rgba(10, 132, 255, 0.12);
+      font-weight: 600;
+    }
+
+    .ios-toast {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-70px);
+      background: var(--bg-elevated);
+      backdrop-filter: blur(24px);
+      border: 0.5px solid var(--glass-border);
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 200;
+      transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .ios-toast.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
 </head>
 <body>
+  <div class="ambient-backdrop"></div>
+  <div id="toast" class="ios-toast">Сохранено</div>
 
-<!-- заглушка: аккаунт не привязан -->
-<div id="screen-block" class="hidden">
-  <div class="icon">🔒</div>
-  <div class="title">Аккаунт не привязан</div>
-  <div class="text">Пожалуйста, откройте бота <b>@AutoBot</b>, напишите <b>/start</b> и завершите привязку аккаунта, затем перезапустите приложение.</div>
-</div>
+  <div id="mainViewport" class="viewport">
+    <header class="ios-navbar">
+      <div>
+        <div class="nav-large-title">AutoBot Core</div>
+        <div id="userHeaderSub" class="nav-subtitle">Синхронизация с Firebase...</div>
+      </div>
+      <div class="conn-pill">
+        <span id="fbStatusDot" class="conn-dot"></span>
+        <span id="fbStatusText">Realtime</span>
+      </div>
+    </header>
 
-<!-- ошибка сети -->
-<div id="screen-error" class="hidden">
-  <div class="icon">📡</div>
-  <div class="title">Нет связи с сервером</div>
-  <div class="text">Не удалось связаться с сервером AutoBot. Проверьте соединение и перезапустите приложение.</div>
-</div>
+    <!-- ВКЛАДКА 1: ПАНЕЛЬ -->
+    <section id="pane-dashboard" class="tab-pane active">
+      <div class="ios-card engine-bar">
+        <div>
+          <div id="engineIndicator" class="state-indicator">● Остановлен</div>
+          <div style="font-size: 16px; font-weight: 600;">Автовыполнение заданий</div>
+          <div id="engineSubMeta" class="row-caption">Тариф: проверка...</div>
+        </div>
+        <button id="engineToggleBtn" class="ios-primary-btn tap-glass" onclick="toggleBotActive()">
+          Запустить
+        </button>
+      </div>
 
-<!-- основной интерфейс -->
-<div id="app" class="hidden">
-  <div class="container">
+      <!-- Блок живой трансляции (отображается при bot_active == true) -->
+      <div id="liveBroadcastSection" style="display: none;">
+        <div class="ios-group-header">Экран бота в реальном времени (1:1)</div>
+        <div class="tg-chat-frame">
+          <div class="tg-chat-header">
+            <div class="tg-header-info">
+              <div class="tg-avatar-circle">PR</div>
+              <div>
+                <div id="screenBotTitle" class="tg-header-title">@gram_prbot</div>
+                <div id="screenPressedStatus" class="tg-header-sub">бот онлайн</div>
+              </div>
+            </div>
+            <div id="screenTimestamp" style="font-size: 11px; color: rgba(255,255,255,0.5);">Live</div>
+          </div>
 
-    <!-- ПРОФИЛЬ -->
-    <div id="tab-profile">
-      <div class="card">
-        <div class="profile-head">
-          <div class="avatar" id="p-avatar">A</div>
+          <div class="tg-chat-viewport">
+            <div class="tg-msg-bubble">
+              <div id="screenFwdHeader" class="tg-fwd-header" style="display: none;"></div>
+              <div id="screenMediaTag" class="tg-media-tag" style="display: none;"></div>
+              <div id="screenMessageText" class="tg-msg-text">Ожидание сообщения от биржи...</div>
+              <div id="screenMsgTime" class="tg-msg-meta">12:00</div>
+            </div>
+            <div id="screenInlineKeyboard" class="tg-inline-keyboard"></div>
+          </div>
+        </div>
+
+        <div class="ios-group-header">Журнал действий (Последние 25)</div>
+        <div id="logsConsole" class="logs-console">
+          <div class="log-row"><span class="log-time">[--:--:--]</span> Подключение к потоку логов...</div>
+        </div>
+      </div>
+
+      <div class="ios-group-header">Параметры выполнения</div>
+      <div class="ios-list-card">
+        <div class="ios-row" style="flex-direction: column; align-items: stretch;">
+          <div class="row-title">Целевой бот биржи</div>
+          <div class="ios-segmented" style="margin-top: 8px;">
+            <div id="segBotGram" class="seg-option tap-glass selected" onclick="updateSetting('target_bot', 'gram_prbot')">@gram_prbot</div>
+            <div id="segBotApp" class="seg-option tap-glass" onclick="updateSetting('target_bot', 'pr_gramapp')">@pr_gramapp</div>
+          </div>
+        </div>
+
+        <div class="ios-row" style="flex-direction: column; align-items: stretch;">
+          <div class="row-title">Категория заданий</div>
+          <div class="ios-segmented" style="margin-top: 8px;">
+            <div id="segGoalChannels" class="seg-option tap-glass selected" onclick="updateSetting('targets', 'channels')">Каналы</div>
+            <div id="segGoalGroups" class="seg-option tap-glass" onclick="updateSetting('targets', 'groups')">Группы</div>
+            <div id="segGoalViews" class="seg-option tap-glass" onclick="updateSetting('targets', 'views')">Просмотры</div>
+          </div>
+        </div>
+
+        <div class="ios-row" style="flex-direction: column; align-items: stretch;">
+          <div class="row-title">Алгоритм проверки</div>
+          <div class="ios-segmented" style="margin-top: 8px;">
+            <div id="segMode1" class="seg-option tap-glass selected" onclick="updateSetting('exec_mode', 1)">По очереди</div>
+            <div id="segMode2" class="seg-option tap-glass" onclick="updateSetting('exec_mode', 2)">Пакетный</div>
+          </div>
+        </div>
+
+        <div class="ios-row">
           <div>
-            <div class="profile-name" id="p-name">—</div>
-            <div class="profile-sub" id="p-user">—</div>
+            <div class="row-title">Интервал задержки (сек)</div>
+            <div class="row-caption">Случайная пауза между заданиями</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <input id="inputDelayMin" type="number" min="2" max="60" class="number-input-mini" value="10" onchange="saveDelayRange()" />
+            <span style="color: var(--label-secondary);">—</span>
+            <input id="inputDelayMax" type="number" min="3" max="120" class="number-input-mini" value="14" onchange="saveDelayRange()" />
           </div>
         </div>
-        <div class="row"><span class="label">Telegram ID</span><span class="value" id="p-id">—</span></div>
-        <div class="row"><span class="label">Аккаунт</span><span class="value" id="p-linked">—</span></div>
-        <div class="row"><span class="label">Подписка</span><span class="value" id="p-sub">—</span></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Реферальная ссылка</div>
-        <div class="row" style="border:none; padding-top:4px">
-          <span class="value" id="p-reflink" style="text-align:left; font-size:14px; word-break:break-all; flex:1; margin-right:12px">—</span>
+
+        <div class="ios-row">
+          <div>
+            <div class="row-title">Обход бана</div>
+            <div class="row-caption">Имитация чтения чата и набора текста</div>
+          </div>
+          <div id="swBypassBan" class="ui-switch" onclick="toggleBooleanSetting('bypass_ban')"></div>
         </div>
-        <button class="btn secondary" onclick="copyRef()">Скопировать ссылку</button>
-      </div>
-    </div>
 
-    <!-- СТАТИСТИКА -->
-    <div id="tab-stats" class="hidden">
-      <div class="section-h">Общая</div>
-      <div class="stat-grid">
-        <div class="stat-card"><div class="stat-num" id="s-users">—</div><div class="stat-label">Пользователей</div></div>
-        <div class="stat-card"><div class="stat-num" id="s-purchases">—</div><div class="stat-label">Покупок</div></div>
+        <div class="ios-row">
+          <div>
+            <div class="row-title">Авто-перелив чеков</div>
+            <div class="row-caption">Сбор баланса на основной аккаунт после стопа</div>
+          </div>
+          <div id="swAutoChecks" class="ui-switch" onclick="toggleBooleanSetting('auto_checks')"></div>
+        </div>
       </div>
-      <div class="section-h">Твои показатели</div>
-      <div class="stat-grid">
-        <div class="stat-card"><div class="stat-num" id="s-refs">—</div><div class="stat-label">Рефералов</div></div>
-        <div class="stat-card"><div class="stat-num" id="s-hours">—</div><div class="stat-label">Часов от рефералов</div></div>
-      </div>
-    </div>
+    </section>
 
-    <!-- НАСТРОЙКИ -->
-    <div id="tab-settings" class="hidden">
-      <div class="card">
-        <div class="card-title">Выполнение заданий</div>
-        <div class="row">
-          <span class="label">Тип заданий</span>
-          <div class="seg">
-            <button id="tgt-ch" onclick="setTarget('channels')">Каналы</button>
-            <button id="tgt-gr" onclick="setTarget('groups')">Группы</button>
+    <!-- ВКЛАДКА 2: АККАУНТ -->
+    <section id="pane-account" class="tab-pane">
+      <div class="ios-group-header">Telegram-сессия</div>
+
+      <!-- Карточка авторизованного профиля -->
+      <div id="authorizedProfileCard" style="display: none;">
+        <div class="ios-list-card">
+          <div class="ios-row">
+            <div>
+              <div id="accProfileName" style="font-size: 17px; font-weight: 600;">Пользователь</div>
+              <div id="accProfileMeta" class="row-caption">+7... · ID 0</div>
+            </div>
+            <span style="font-size: 12px; font-weight: 600; color: var(--ios-green);">Авторизован</span>
+          </div>
+          <div class="ios-row">
+            <div class="row-title">Устройство сессии</div>
+            <div id="accDeviceModel" style="font-size: 14px; color: var(--ios-blue); font-weight: 500;">—</div>
+          </div>
+          <div class="ios-row">
+            <div class="row-title">Версия системы</div>
+            <div id="accSystemVersion" style="font-size: 14px; color: var(--label-secondary);">—</div>
           </div>
         </div>
-        <div class="row">
-          <span class="label">Задержка, сек</span>
-          <input type="number" id="set-delay" min="3" step="0.5" style="width:80px">
-        </div>
-        <div class="row">
-          <span class="label">Рандом задержки</span>
-          <label class="switch"><input type="checkbox" id="set-jitter" onchange="setSwitch('random_delay', this.checked)"><span class="track"></span><span class="knob"></span></label>
-        </div>
+        <button class="ios-full-btn destructive tap-glass" onclick="requestUnbindAccount()">
+          Отвязать аккаунт
+        </button>
       </div>
-      <div class="card">
-        <div class="card-title">Автоматизация</div>
-        <div class="row">
-          <span class="label">Авто-архив</span>
-          <label class="switch"><input type="checkbox" id="set-archive" onchange="setSwitch('auto_archive', this.checked)"><span class="track"></span><span class="knob"></span></label>
-        </div>
-        <div class="row">
-          <span class="label">Авто-отписка, дней</span>
-          <input type="number" id="set-unsub" min="7" step="1" style="width:80px">
-        </div>
-        <button class="btn" onclick="saveNumbers()">Сохранить</button>
-      </div>
-      <div class="card">
-        <div class="card-title">Рабочий бот заданий</div>
-        <div class="seg" style="padding:0">
-          <button id="bot-piar" onclick="setBot('gram_piarbot')">@gram_piarbot</button>
-          <button id="bot-pr" onclick="setBot('gram_prbot')">@gram_prbot</button>
-        </div>
-      </div>
-    </div>
 
-    <!-- УПРАВЛЕНИЕ -->
-    <div id="tab-control" class="hidden">
-      <div class="card">
-        <div class="card-title">AutoBot</div>
-        <div class="row" style="border:none">
-          <span class="label">Статус подписки</span>
-          <span class="value" id="c-sub">—</span>
-        </div>
-        <div class="btn-stack">
-          <button class="btn" onclick="sendCommand('start')">▶ Запустить AutoBot</button>
-          <button class="btn secondary" onclick="sendCommand('stop')">■ Остановить</button>
-        </div>
-      </div>
-      <div class="card" id="c-free-card">
-        <div class="card-title">Бесплатная подписка</div>
-        <div class="row" style="border:none">
-          <span class="label" style="flex:1; margin-right:12px">Получить 7 дней бесплатно — один раз</span>
-        </div>
-        <button class="btn" id="c-free-btn" onclick="claimFree()">Получить 7 дней</button>
-      </div>
-    </div>
+      <!-- Форма пошаговой авторизации -->
+      <div id="authFlowContainer" class="ios-card">
+        <div id="authErrorBanner" style="display:none; color: var(--ios-red); font-size: 13px; margin-bottom: 10px; font-weight: 500;"></div>
 
+        <!-- Шаг 1: Ввод номера -->
+        <div id="stepPhoneBox">
+          <div class="row-title">Привязка аккаунта</div>
+          <div class="row-caption">Вход выполняется с кастомными параметрами устройства.</div>
+          <input id="authPhoneField" type="tel" class="ios-input" placeholder="+7 999 123 45 67" />
+          <button class="ios-full-btn tap-glass" onclick="triggerSendPhone()">Получить код</button>
+        </div>
+
+        <!-- Шаг 2: Ввод кода с встроенной клавиатурой -->
+        <div id="stepCodeBox" style="display: none;">
+          <div class="row-title" style="text-align: center;">Код подтверждения</div>
+          <div class="row-caption" style="text-align: center;">Введите 5 цифр из сообщения Telegram</div>
+
+          <div class="pin-boxes">
+            <div id="pin0" class="pin-cell"></div>
+            <div id="pin1" class="pin-cell"></div>
+            <div id="pin2" class="pin-cell"></div>
+            <div id="pin3" class="pin-cell"></div>
+            <div id="pin4" class="pin-cell"></div>
+          </div>
+
+          <div class="ios-keypad">
+            <div class="key-btn tap-glass" onclick="tapPinKey('1')">1</div>
+            <div class="key-btn tap-glass" onclick="tapPinKey('2')">2</div>
+            <div class="key-btn tap-glass" onclick="tapPinKey('3')">3</div>
+            <div class="key-btn tap-glass" onclick="tapPinKey('4')">4</div>
+            <div class="key-btn tap-glass" onclick="tapPinKey('5')">5</div>
+            <div class="key-btn tap-glass" onclick="tapPinKey('6')">6</div>
+            <div class="key-btn tap-glass" onclick="tapPinKey('7')">7</div>
+            <div class="key-btn tap-glass" onclick="tapPinKey('8')">8</div>
+            <div class="key-btn tap-glass" onclick="tapPinKey('9')">9</div>
+            <div class="key-btn sub tap-glass" onclick="resetAuthFlowToPhone()">Назад</div>
+            <div class="key-btn tap-glass" onclick="tapPinKey('0')">0</div>
+            <div class="key-btn sub tap-glass" onclick="backspacePinKey()">Стереть</div>
+          </div>
+        </div>
+
+        <!-- Шаг 3: Ввод пароля 2FA -->
+        <div id="step2FABox" style="display: none;">
+          <div class="row-title">Облачный пароль 2FA</div>
+          <div class="row-caption">На аккаунте установлена двухфакторная аутентификация</div>
+          <input id="auth2FAField" type="password" class="ios-input" placeholder="Введите пароль" />
+          <button class="ios-full-btn tap-glass" onclick="triggerSend2FA()">Подтвердить пароль</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ВКЛАДКА 3: ТАРИФЫ -->
+    <section id="pane-tariffs" class="tab-pane">
+      <div class="ios-group-header">Тарифные планы</div>
+
+      <div id="planCardBasic" class="ios-card">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <div style="font-size: 18px; font-weight: 700;">Базовый</div>
+          <div style="font-size: 17px; font-weight: 600; color: var(--ios-blue);">29 ₽ / мес</div>
+        </div>
+        <div class="row-caption" style="margin: 10px 0 14px; line-height: 1.55;">
+          • Задания категорий «Каналы» и «Группы»<br/>
+          • Подключение 1 аккаунта<br/>
+          • Автоматическая архивация чатов
+        </div>
+        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('basic')">Выбрать Базовый</button>
+      </div>
+
+      <div id="planCardMedium" class="ios-card">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <div style="font-size: 18px; font-weight: 700;">Средний</div>
+          <div style="font-size: 17px; font-weight: 600; color: var(--ios-green);">49 ₽ / мес</div>
+        </div>
+        <div class="row-caption" style="margin: 10px 0 14px; line-height: 1.55;">
+          • Все категории: Каналы, Группы, Просмотры<br/>
+          • Подключение до 3 аккаунтов<br/>
+          • Умный обход бана (имитация человека)<br/>
+          • Автоматический сбор чеков на основной аккаунт
+        </div>
+        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('medium')">Выбрать Средний</button>
+      </div>
+    </section>
+
+    <!-- ВКЛАДКА 4: ОПЛАТА -->
+    <section id="pane-payment" class="tab-pane">
+      <div class="ios-group-header">Оформление подписки</div>
+      <div class="ios-list-card">
+        <div class="ios-row" style="flex-direction: column; align-items: stretch;">
+          <div class="row-title">Тарифный план</div>
+          <div class="ios-segmented" style="margin-top: 8px;">
+            <div id="payOptBasic" class="seg-option tap-glass selected" onclick="selectPayPlan('basic')">Базовый (29 ₽)</div>
+            <div id="payOptMedium" class="seg-option tap-glass" onclick="selectPayPlan('medium')">Средний (49 ₽)</div>
+          </div>
+        </div>
+
+        <div class="ios-row" style="flex-direction: column; align-items: stretch;">
+          <div class="row-title">Способ оплаты</div>
+          <div class="ios-segmented" style="margin-top: 8px;">
+            <div id="payWayCrypto" class="seg-option tap-glass selected" onclick="selectPayMethod('cryptobot')">CryptoBot</div>
+            <div id="payWayStars" class="seg-option tap-glass" onclick="selectPayMethod('stars')">TG Stars</div>
+            <div id="payWayCard" class="seg-option tap-glass" onclick="selectPayMethod('card')">Карта</div>
+          </div>
+        </div>
+
+        <div class="ios-row">
+          <div class="row-title">Итого к оплате (30 дней)</div>
+          <div id="paySummaryPrice" style="font-size: 16px; font-weight: 700; color: var(--ios-blue);">29 ₽</div>
+        </div>
+      </div>
+
+      <button class="ios-full-btn tap-glass" onclick="submitPaymentRequest()">Оформить заявку</button>
+    </section>
+
+    <!-- ВКЛАДКА 5: ИНФО -->
+    <section id="pane-info" class="tab-pane">
+      <div class="ios-group-header">Сведения о системе</div>
+      <div class="ios-list-card">
+        <div class="ios-row">
+          <div class="row-title">Версия ядра</div>
+          <div class="row-caption">AutoBot PR GRAM Core 3.0</div>
+        </div>
+        <div class="ios-row">
+          <div class="row-title">Разработчики</div>
+          <div class="row-caption">Lucid & Telvory</div>
+        </div>
+        <div class="ios-row">
+          <div class="row-title">Синхронизация</div>
+          <div id="infoConnLabel" class="row-caption" style="color: var(--ios-green);">Firebase Realtime DB</div>
+        </div>
+        <div class="ios-row">
+          <div class="row-title">Ваш Telegram ID</div>
+          <div id="infoUidLabel" class="row-caption">—</div>
+        </div>
+      </div>
+
+      <button class="ios-full-btn tap-glass" onclick="openExternal('https://t.me/autobotpiarbot')">
+        Открыть диалог с ботом
+      </button>
+    </section>
   </div>
 
-  <nav id="nav">
-    <button class="active" data-tab="profile" onclick="switchTab('profile')"><span class="nav-ic">👤</span>Профиль</button>
-    <button data-tab="stats" onclick="switchTab('stats')"><span class="nav-ic">📊</span>Статистика</button>
-    <button data-tab="settings" onclick="switchTab('settings')"><span class="nav-ic">⚙️</span>Настройки</button>
-    <button data-tab="control" onclick="switchTab('control')"><span class="nav-ic">🎮</span>Управление</button>
+  <!-- Нижний таб-бар -->
+  <nav class="ios-tabbar">
+    <div class="tab-btn active tap-glass" onclick="switchPane('dashboard', this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>
+      <span>Панель</span>
+    </div>
+    <div class="tab-btn tap-glass" onclick="switchPane('account', this)">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Аккаунт</span>
+    </div>
+    <div class="tab-btn tap-glass" onclick="switchPane('tariffs', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>Тарифы</span>
+    </div>
+    <div class="tab-btn tap-glass" onclick="switchPane('payment', this)">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <span>Оплата</span>
+    </div>
+    <div class="tab-btn tap-glass" onclick="switchPane('info', this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>Инфо</span>
+    </div>
   </nav>
-</div>
 
-<div id="toast"></div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, onValue, update, set, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-<script>
-'use strict';
+    const firebaseConfig = {
+      databaseURL: "https://autobotbd-62b2d-default-rtdb.firebaseio.com"
+    };
 
-const API_BASE = "https://couple-leeds-smoking-mandate.trycloudflare.com"; // ← подставь адрес main.py
-const tg = window.Telegram.WebApp;
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-tg.ready();
-tg.expand();
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      if (tg.colorScheme === "light") {
+        document.body.classList.add("light-theme");
+      }
+    }
 
-let ME = null;      // данные /api/me
-let SETTINGS = null;
+    const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : {
+      id: 8932533956,
+      username: "ed49k",
+      first_name: "Эльдар"
+    };
 
-/* ---------- API ---------- */
-async function api(path, body = {}) {
-  const resp = await fetch(API_BASE + path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(Object.assign({ init_data: tg.initData }, body))
-  });
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  return resp.json();
-}
+    const USER_ID = tgUser.id;
+    document.getElementById("userHeaderSub").textContent = `@${tgUser.username || "user"} · ID ${USER_ID}`;
+    document.getElementById("infoUidLabel").textContent = String(USER_ID);
 
-/* ---------- тост ---------- */
-let toastTimer = null;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
-}
+    let localUser = {
+      bot_active: false,
+      tariff: "none",
+      settings: {
+        target_bot: "gram_prbot",
+        targets: "channels",
+        exec_mode: 1,
+        bypass_ban: false,
+        auto_checks: false,
+        delay_min: 10,
+        delay_max: 14
+      },
+      account: { authorized: false },
+      auth_flow: { step: "idle" }
+    };
 
-function haptic(type) {
-  try { tg.HapticFeedback.impactOccurred(type || 'light'); } catch (e) {}
-}
+    let pinBuffer = "";
+    let selectedPlan = "basic";
+    let selectedMethod = "cryptobot";
 
-/* ---------- запуск ---------- */
-async function boot() {
-  try {
-    ME = await api('/api/me');
-  } catch (e) {
-    document.getElementById('screen-error').classList.remove('hidden');
-    return;
-  }
+    function haptic(style = "light") {
+      try {
+        if (!tg || !tg.HapticFeedback) return;
+        if (style === "selection") tg.HapticFeedback.selectionChanged();
+        else if (["success", "warning", "error"].includes(style)) tg.HapticFeedback.notificationOccurred(style);
+        else tg.HapticFeedback.impactOccurred(style);
+      } catch (e) {}
+    }
 
-  // блокировка: нет в базе или не привязан
-  if (!ME.ok || !ME.registered || !ME.linked) {
-    document.getElementById('screen-block').classList.remove('hidden');
-    return;
-  }
+    function notifyToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("visible");
+      setTimeout(() => el.classList.remove("visible"), 2000);
+    }
 
-  document.getElementById('app').classList.remove('hidden');
-  renderProfile();
-  loadStats();
-  loadSettings();
-}
+    function escapeHtml(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
 
-function renderProfile() {
-  const u = ME.user || {};
-  const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Пользователь';
-  document.getElementById('p-avatar').textContent = (u.first_name || 'A')[0].toUpperCase();
-  document.getElementById('p-name').textContent = name;
-  document.getElementById('p-user').textContent = u.username ? '@' + u.username : 'без username';
-  document.getElementById('p-id').textContent = ME.telegram_id;
+    const connRef = ref(db, ".info/connected");
+    onValue(connRef, (snap) => {
+      const online = Boolean(snap.val());
+      document.getElementById("fbStatusDot").classList.toggle("offline", !online);
+      document.getElementById("fbStatusText").textContent = online ? "Realtime" : "Offline";
+      document.getElementById("infoConnLabel").textContent = online ? "Firebase Live (Подключено)" : "Отключено";
+    });
 
-  const linked = document.getElementById('p-linked');
-  if (ME.linked) { linked.innerHTML = '<span class="pill ok">привязан</span>'; }
-  else { linked.innerHTML = '<span class="pill off">не привязан</span>'; }
+    const userRef = ref(db, `users/${USER_ID}`);
+    onValue(userRef, (snapshot) => {
+      const val = snapshot.val();
+      if (!val) {
+        const initPayload = {
+          user_id: USER_ID,
+          username: tgUser.username || "",
+          first_name: tgUser.first_name || "",
+          tariff: "none",
+          tariff_until: 0,
+          bot_active: false,
+          settings: localUser.settings,
+          account: { authorized: false },
+          auth_flow: { step: "idle" }
+        };
+        set(userRef, initPayload);
+        return;
+      }
+      localUser = {
+        ...localUser,
+        ...val,
+        settings: { ...localUser.settings, ...(val.settings || {}) },
+        account: { ...(val.account || {}) },
+        auth_flow: { ...(val.auth_flow || {}) }
+      };
+      renderAll();
+    });
 
-  const sub = document.getElementById('p-sub');
-  const csub = document.getElementById('c-sub');
-  if (ME.sub_active) {
-    const days = Math.max(1, Math.ceil((ME.sub_until - Date.now() / 1000) / 86400));
-    sub.innerHTML = '<span class="pill ok">активна, ' + days + ' дн.</span>';
-    csub.innerHTML = '<span class="pill ok">' + days + ' дней</span>';
-  } else {
-    sub.innerHTML = '<span class="pill off">нет</span>';
-    csub.innerHTML = '<span class="pill off">нет подписки</span>';
-  }
+    function renderAll() {
+      const isRun = Boolean(localUser.bot_active);
+      const ind = document.getElementById("engineIndicator");
+      const btn = document.getElementById("engineToggleBtn");
+      ind.textContent = isRun ? "● Работает" : "● Остановлен";
+      ind.classList.toggle("on", isRun);
+      btn.textContent = isRun ? "Остановить" : "Запустить";
+      btn.classList.toggle("stop", isRun);
 
-  // реферальная ссылка — берём username бота из настроек фронтенда нельзя, узнаем у бэка
-  document.getElementById('p-reflink').textContent = ME.ref_link || '—';
+      const tMap = { none: "Не активен", basic: "Базовый", medium: "Средний" };
+      document.getElementById("engineSubMeta").textContent = `Тариф: ${tMap[localUser.tariff] || localUser.tariff}`;
 
-  // бесплатка
-  if (ME.free_used || ME.sub_active) {
-    document.getElementById('c-free-card').classList.add('hidden');
-  }
-}
+      document.getElementById("liveBroadcastSection").style.display = isRun ? "block" : "none";
 
-async function loadStats() {
-  try {
-    const s = await api('/api/stats');
-    document.getElementById('s-users').textContent = s.users;
-    document.getElementById('s-purchases').textContent = s.purchases;
-    document.getElementById('s-refs').textContent = s.refs;
-    document.getElementById('s-hours').textContent = s.refs * 12;
-  } catch (e) { toast('Не удалось загрузить статистику'); }
-}
+      const s = localUser.settings;
+      document.getElementById("segBotGram").classList.toggle("selected", s.target_bot === "gram_prbot");
+      document.getElementById("segBotApp").classList.toggle("selected", s.target_bot === "pr_gramapp");
 
-async function loadSettings() {
-  try {
-    SETTINGS = await api('/api/settings');
-    document.getElementById('tgt-ch').classList.toggle('active', SETTINGS.target === 'channels');
-    document.getElementById('tgt-gr').classList.toggle('active', SETTINGS.target === 'groups');
-    document.getElementById('set-delay').value = SETTINGS.delay;
-    document.getElementById('set-jitter').checked = SETTINGS.random_delay;
-    document.getElementById('set-archive').checked = SETTINGS.auto_archive;
-    document.getElementById('set-unsub').value = SETTINGS.unsub_days;
-    document.getElementById('bot-piar').classList.toggle('active', SETTINGS.bot_username === 'gram_piarbot');
-    document.getElementById('bot-pr').classList.toggle('active', SETTINGS.bot_username === 'gram_prbot');
-  } catch (e) { toast('Не удалось загрузить настройки'); }
-}
+      document.getElementById("segGoalChannels").classList.toggle("selected", s.targets === "channels");
+      document.getElementById("segGoalGroups").classList.toggle("selected", s.targets === "groups");
+      document.getElementById("segGoalViews").classList.toggle("selected", s.targets === "views");
 
-/* ---------- изменения настроек ---------- */
-async function setTarget(target) {
-  haptic();
-  await patchSettings({ target: target });
-}
-async function setBot(bot_username) {
-  haptic();
-  await patchSettings({ bot_username: bot_username });
-}
-async function setSwitch(key, value) {
-  haptic();
-  await patchSettings({ [key]: value });
-}
-async function saveNumbers() {
-  const delay = parseFloat(document.getElementById('set-delay').value);
-  const unsub = parseInt(document.getElementById('set-unsub').value);
-  if (isNaN(delay) || delay < 3) { toast('Задержка: минимум 3 секунды'); return; }
-  if (isNaN(unsub) || unsub < 7) { toast('Авто-отписка: минимум 7 дней'); return; }
-  await patchSettings({ delay: delay, unsub_days: unsub });
-}
+      document.getElementById("segMode1").classList.toggle("selected", Number(s.exec_mode) === 1);
+      document.getElementById("segMode2").classList.toggle("selected", Number(s.exec_mode) === 2);
 
-async function patchSettings(patch) {
-  try {
-    SETTINGS = await api('/api/settings/update', { patch: patch });
-    loadSettings();
-    toast('Сохранено');
-  } catch (e) {
-    toast('Ошибка сохранения');
-    loadSettings();
-  }
-}
+      document.getElementById("inputDelayMin").value = s.delay_min || 10;
+      document.getElementById("inputDelayMax").value = s.delay_max || 14;
 
-/* ---------- команды бота ---------- */
-async function sendCommand(cmd) {
-  haptic('medium');
-  try {
-    const r = await api('/api/command', { command: cmd });
-    toast(r.ok ? (cmd === 'start' ? 'Команда отправлена — смотри бота' : 'Остановка отправлена') : r.error);
-  } catch (e) { toast('Ошибка отправки'); }
-}
+      document.getElementById("swBypassBan").classList.toggle("checked", Boolean(s.bypass_ban));
+      document.getElementById("swAutoChecks").classList.toggle("checked", Boolean(s.auto_checks));
 
-async function claimFree() {
-  haptic('medium');
-  try {
-    const r = await api('/api/free7');
-    if (r.ok) {
-      toast('Выдано 7 дней');
-      ME = await api('/api/me');
-      renderProfile();
-    } else { toast(r.error || 'Недоступно'); }
-  } catch (e) { toast('Ошибка'); }
-}
+      renderLiveScreen1to1(localUser.screen || {});
+      renderLogsStream(localUser.logs || []);
+      renderAccountSection(localUser.account || {}, localUser.auth_flow || {});
+    }
 
-/* ---------- прочее ---------- */
-function copyRef() {
-  haptic();
-  const link = ME.ref_link || '';
-  if (!link) return;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(link).then(() => toast('Скопировано'));
-  } else { toast(link); }
-}
+    function renderLiveScreen1to1(scr) {
+      const botName = scr.bot_username ? `@${String(scr.bot_username).replace("@", "")}` : `@${localUser.settings.target_bot}`;
+      document.getElementById("screenBotTitle").textContent = botName;
+      document.getElementById("screenPressedStatus").textContent = scr.pressed ? `Нажато: ${scr.pressed}` : "ожидание действия";
+      document.getElementById("screenMsgTime").textContent = scr.msg_time || "сейчас";
 
-function switchTab(tab) {
-  haptic();
-  ['profile', 'stats', 'settings', 'control'].forEach(t => {
-    document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
-  });
-  document.querySelectorAll('#nav button').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === tab);
-  });
-}
+      const fwdEl = document.getElementById("screenFwdHeader");
+      if (scr.fwd_title) {
+        fwdEl.style.display = "block";
+        fwdEl.textContent = `Переслано от ${scr.fwd_title}`;
+      } else {
+        fwdEl.style.display = "none";
+      }
 
-boot();
-</script>
+      const mediaEl = document.getElementById("screenMediaTag");
+      if (scr.media_type) {
+        mediaEl.style.display = "inline-block";
+        mediaEl.textContent = scr.media_type;
+      } else {
+        mediaEl.style.display = "none";
+      }
+
+      document.getElementById("screenMessageText").textContent = scr.message || "Ожидание сообщения от биржи...";
+
+      const kbContainer = document.getElementById("screenInlineKeyboard");
+      kbContainer.innerHTML = "";
+
+      if (Array.isArray(scr.rows) && scr.rows.length > 0) {
+        scr.rows.forEach((rowArr) => {
+          if (!Array.isArray(rowArr)) return;
+          const rowDiv = document.createElement("div");
+          rowDiv.className = "tg-kb-row";
+          rowArr.forEach((btnObj) => {
+            const b = document.createElement("div");
+            const isPressed = Boolean(btnObj.pressed) || (scr.pressed && scr.pressed === btnObj.text);
+            b.className = "tg-kb-btn" + (isPressed ? " pressed-now" : "");
+            b.textContent = btnObj.text || "Кнопка";
+            if (btnObj.is_link || btnObj.url) {
+              const arr = document.createElement("span");
+              arr.className = "link-arrow";
+              arr.textContent = "↗";
+              b.appendChild(arr);
+            }
+            rowDiv.appendChild(b);
+          });
+          kbContainer.appendChild(rowDiv);
+        });
+      } else if (Array.isArray(scr.buttons) && scr.buttons.length > 0) {
+        for (let i = 0; i < scr.buttons.length; i += 2) {
+          const rowDiv = document.createElement("div");
+          rowDiv.className = "tg-kb-row";
+          scr.buttons.slice(i, i + 2).forEach((bText) => {
+            const b = document.createElement("div");
+            b.className = "tg-kb-btn" + (scr.pressed === bText ? " pressed-now" : "");
+            b.textContent = bText;
+            rowDiv.appendChild(b);
+          });
+          kbContainer.appendChild(rowDiv);
+        }
+      }
+    }
+
+    function renderLogsStream(logs) {
+      const box = document.getElementById("logsConsole");
+      const arr = Array.isArray(logs) ? logs : Object.values(logs || {});
+      if (!arr.length) return;
+      box.innerHTML = arr.map((item) => {
+        const ts = item.ts || "--:--:--";
+        const txt = item.text || item.message || "";
+        return `<div class="log-row"><span class="log-time">[${escapeHtml(ts)}]</span>${escapeHtml(txt)}</div>`;
+      }).join("");
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function renderAccountSection(acc, flow) {
+      const isAuth = Boolean(acc.authorized) || flow.step === "authorized";
+      document.getElementById("authorizedProfileCard").style.display = isAuth ? "block" : "none";
+      document.getElementById("authFlowContainer").style.display = isAuth ? "none" : "block";
+
+      if (isAuth) {
+        document.getElementById("accProfileName").textContent = acc.name || "Telegram Аккаунт";
+        document.getElementById("accProfileMeta").textContent = `${acc.phone || ""} · @${acc.username || "user"}`;
+        document.getElementById("accDeviceModel").textContent = acc.device_model || "Nokia 3310 Ultra Pro Max";
+        document.getElementById("accSystemVersion").textContent = acc.system_version || "BolgenOS 2.0";
+        return;
+      }
+
+      const errEl = document.getElementById("authErrorBanner");
+      if (flow.error) {
+        errEl.style.display = "block";
+        errEl.textContent = flow.error;
+      } else {
+        errEl.style.display = "none";
+      }
+
+      const st = flow.step || "idle";
+      document.getElementById("stepPhoneBox").style.display = (st === "idle" || st === "send_phone" || st === "sending_code") ? "block" : "none";
+      document.getElementById("stepCodeBox").style.display = (st === "wait_code" || st === "verifying_code") ? "block" : "none";
+      document.getElementById("step2FABox").style.display = (st === "wait_2fa" || st === "verifying_2fa") ? "block" : "none";
+    }
+
+    window.switchPane = function(paneId, btnEl) {
+      haptic("selection");
+      const vp = document.getElementById("mainViewport");
+      vp.classList.add("blur-switching");
+
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      if (btnEl) btnEl.classList.add("active");
+
+      setTimeout(() => {
+        document.querySelectorAll(".tab-pane").forEach((p) => p.classList.remove("active"));
+        const target = document.getElementById("pane-" + paneId);
+        if (target) target.classList.add("active");
+        vp.classList.remove("blur-switching");
+      }, 130);
+    };
+
+    window.toggleBotActive = function() {
+      haptic("medium");
+      if (!localUser.bot_active && !localUser.account.authorized) {
+        haptic("error");
+        notifyToast("Сначала привяжите аккаунт");
+        return;
+      }
+      const next = !localUser.bot_active;
+      update(ref(db, `users/${USER_ID}`), { bot_active: next });
+      notifyToast(next ? "Автобот запущен" : "Автобот остановлен");
+    };
+
+    window.updateSetting = function(key, val) {
+      haptic("selection");
+      update(ref(db, `users/${USER_ID}/settings`), { [key]: val });
+      notifyToast("Сохранено");
+    };
+
+    window.toggleBooleanSetting = function(key) {
+      haptic("selection");
+      const next = !localUser.settings[key];
+      update(ref(db, `users/${USER_ID}/settings`), { [key]: next });
+    };
+
+    window.saveDelayRange = function() {
+      const dMin = Math.max(2, Number(document.getElementById("inputDelayMin").value || 10));
+      const dMax = Math.max(dMin + 1, Number(document.getElementById("inputDelayMax").value || 14));
+      update(ref(db, `users/${USER_ID}/settings`), { delay_min: dMin, delay_max: dMax });
+      notifyToast("Задержка обновлена");
+    };
+
+    window.triggerSendPhone = function() {
+      haptic("medium");
+      const phone = document.getElementById("authPhoneField").value.trim();
+      if (phone.length < 8) {
+        notifyToast("Введите корректный номер");
+        return;
+      }
+      pinBuffer = "";
+      renderPinCells();
+      update(ref(db, `users/${USER_ID}/auth_flow`), {
+        step: "send_phone",
+        phone: phone,
+        code: "",
+        error: "",
+        updated_at: Date.now()
+      });
+      notifyToast("Отправка кода...");
+    };
+
+    function renderPinCells() {
+      for (let i = 0; i < 5; i++) {
+        const cell = document.getElementById("pin" + i);
+        const ch = pinBuffer[i] || "";
+        cell.textContent = ch;
+        cell.classList.toggle("active", Boolean(ch));
+      }
+    }
+
+    window.tapPinKey = function(digit) {
+      haptic("light");
+      if (pinBuffer.length >= 5) return;
+      pinBuffer += digit;
+      renderPinCells();
+      if (pinBuffer.length === 5) {
+        update(ref(db, `users/${USER_ID}/auth_flow`), {
+          code: pinBuffer,
+          updated_at: Date.now()
+        });
+        notifyToast("Проверка кода...");
+        pinBuffer = "";
+        setTimeout(renderPinCells, 400);
+      }
+    };
+
+    window.backspacePinKey = function() {
+      haptic("selection");
+      pinBuffer = pinBuffer.slice(0, -1);
+      renderPinCells();
+    };
+
+    window.resetAuthFlowToPhone = function() {
+      haptic("warning");
+      pinBuffer = "";
+      renderPinCells();
+      update(ref(db, `users/${USER_ID}/auth_flow`), {
+        step: "idle",
+        code: "",
+        error: ""
+      });
+    };
+
+    window.triggerSend2FA = function() {
+      haptic("medium");
+      const pwd = document.getElementById("auth2FAField").value;
+      if (!pwd) {
+        notifyToast("Введите облачный пароль");
+        return;
+      }
+      update(ref(db, `users/${USER_ID}/auth_flow`), {
+        password: pwd,
+        updated_at: Date.now()
+      });
+      notifyToast("Проверка пароля 2FA...");
+    };
+
+    window.requestUnbindAccount = function() {
+      haptic("warning");
+      update(ref(db, `users/${USER_ID}/auth_flow`), {
+        step: "unbind",
+        updated_at: Date.now()
+      });
+      notifyToast("Сессия отключается...");
+    };
+
+    window.openPayWithPlan = function(plan) {
+      selectPayPlan(plan);
+      const tabs = document.querySelectorAll(".tab-btn");
+      switchPane("payment", tabs[3]);
+    };
+
+    window.selectPayPlan = function(plan) {
+      haptic("selection");
+      selectedPlan = plan;
+      document.getElementById("payOptBasic").classList.toggle("selected", plan === "basic");
+      document.getElementById("payOptMedium").classList.toggle("selected", plan === "medium");
+      document.getElementById("paySummaryPrice").textContent = plan === "basic" ? "29 ₽" : "49 ₽";
+    };
+
+    window.selectPayMethod = function(m) {
+      haptic("selection");
+      selectedMethod = m;
+      document.getElementById("payWayCrypto").classList.toggle("selected", m === "cryptobot");
+      document.getElementById("payWayStars").classList.toggle("selected", m === "stars");
+      document.getElementById("payWayCard").classList.toggle("selected", m === "card");
+    };
+
+    window.submitPaymentRequest = function() {
+      haptic("success");
+      const ordersRef = ref(db, `payment_orders/${USER_ID}`);
+      push(ordersRef, {
+        user_id: USER_ID,
+        tariff: selectedPlan,
+        method: selectedMethod,
+        amount: selectedPlan === "basic" ? 29 : 49,
+        created_at: Date.now()
+      });
+      notifyToast("Заявка создана. Переход в бота...");
+      setTimeout(() => openExternal("https://t.me/autobotpiarbot"), 700);
+    };
+
+    window.openExternal = function(url) {
+      if (tg && tg.openTelegramLink && url.startsWith("https://t.me/")) {
+        tg.openTelegramLink(url);
+      } else if (tg && tg.openLink) {
+        tg.openLink(url);
+      } else {
+        window.open(url, "_blank");
+      }
+    };
+  </script>
 </body>
   </html>
