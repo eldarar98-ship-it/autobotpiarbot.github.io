@@ -94,7 +94,6 @@
       opacity: 0.85;
     }
 
-    /* Навигационный бар iOS */
     .ios-navbar {
       display: flex;
       align-items: center;
@@ -140,7 +139,6 @@
       background: var(--ios-red);
     }
 
-    /* Секции и карточки */
     .tab-pane {
       display: none;
     }
@@ -203,7 +201,6 @@
       margin-top: 2px;
     }
 
-    /* Главная карточка статуса */
     .engine-bar {
       display: flex;
       align-items: center;
@@ -259,7 +256,6 @@
       border: 0.5px solid rgba(255, 69, 58, 0.35);
     }
 
-    /* UISegmentedControl */
     .ios-segmented {
       display: flex;
       background: var(--bg-grouped);
@@ -287,7 +283,6 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
     }
 
-    /* UISwitch */
     .ui-switch {
       position: relative;
       width: 51px;
@@ -320,7 +315,6 @@
       transform: translateX(20px);
     }
 
-    /* ТОЧНАЯ РЕПЛИКА ЭКРАНА ЧАТА TELEGRAM (1:1 LIVE SCREEN) */
     .tg-chat-frame {
       background: var(--tg-chat-bg);
       border-radius: 16px;
@@ -468,7 +462,6 @@
       100% { transform: scale(1); }
     }
 
-    /* Окно логов */
     .logs-console {
       background: rgba(12, 12, 14, 0.82);
       border: 0.5px solid var(--glass-border);
@@ -492,7 +485,6 @@
       margin-right: 6px;
     }
 
-    /* Поля ввода и Пин-пад */
     .ios-input {
       width: 100%;
       background: var(--bg-grouped);
@@ -567,7 +559,6 @@
       color: var(--label-secondary);
     }
 
-    /* Нижний таб-бар iOS 26 */
     .ios-tabbar {
       position: fixed;
       bottom: 12px;
@@ -641,6 +632,14 @@
     .ios-toast.visible {
       transform: translateX(-50%) translateY(0);
     }
+
+    .info-link {
+      color: var(--ios-blue);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -651,19 +650,18 @@
     <header class="ios-navbar">
       <div>
         <div class="nav-large-title">AutoBot Core</div>
-        <div id="userHeaderSub" class="nav-subtitle">Синхронизация с Firebase...</div>
+        <div id="userHeaderSub" class="nav-subtitle">Синхронизация...</div>
       </div>
       <div class="conn-pill">
-        <span id="fbStatusDot" class="conn-dot"></span>
-        <span id="fbStatusText">Realtime</span>
+        <span id="connStatusDot" class="conn-dot"></span>
+        <span id="connStatusText">Online</span>
       </div>
     </header>
 
-    <!-- ВКЛАДКА 1: ПАНЕЛЬ -->
     <section id="pane-dashboard" class="tab-pane active">
       <div class="ios-card engine-bar">
         <div>
-          <div id="engineIndicator" class="state-indicator">● Остановлен</div>
+          <div id="engineIndicator" class="state-indicator">Остановлен</div>
           <div style="font-size: 16px; font-weight: 600;">Автовыполнение заданий</div>
           <div id="engineSubMeta" class="row-caption">Тариф: проверка...</div>
         </div>
@@ -672,9 +670,8 @@
         </button>
       </div>
 
-      <!-- Блок живой трансляции (отображается при bot_active == true) -->
       <div id="liveBroadcastSection" style="display: none;">
-        <div class="ios-group-header">Экран бота в реальном времени (1:1)</div>
+        <div class="ios-group-header">Экран бота в реальном времени</div>
         <div class="tg-chat-frame">
           <div class="tg-chat-header">
             <div class="tg-header-info">
@@ -698,7 +695,7 @@
           </div>
         </div>
 
-        <div class="ios-group-header">Журнал действий (Последние 25)</div>
+        <div class="ios-group-header">Журнал действий</div>
         <div id="logsConsole" class="logs-console">
           <div class="log-row"><span class="log-time">[--:--:--]</span> Подключение к потоку логов...</div>
         </div>
@@ -761,11 +758,9 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 2: АККАУНТ -->
     <section id="pane-account" class="tab-pane">
       <div class="ios-group-header">Telegram-сессия</div>
 
-      <!-- Карточка авторизованного профиля -->
       <div id="authorizedProfileCard" style="display: none;">
         <div class="ios-list-card">
           <div class="ios-row">
@@ -789,11 +784,9 @@
         </button>
       </div>
 
-      <!-- Форма пошаговой авторизации -->
       <div id="authFlowContainer" class="ios-card">
         <div id="authErrorBanner" style="display:none; color: var(--ios-red); font-size: 13px; margin-bottom: 10px; font-weight: 500;"></div>
 
-        <!-- Шаг 1: Ввод номера -->
         <div id="stepPhoneBox">
           <div class="row-title">Привязка аккаунта</div>
           <div class="row-caption">Вход выполняется с кастомными параметрами устройства.</div>
@@ -801,7 +794,6 @@
           <button class="ios-full-btn tap-glass" onclick="triggerSendPhone()">Получить код</button>
         </div>
 
-        <!-- Шаг 2: Ввод кода с встроенной клавиатурой -->
         <div id="stepCodeBox" style="display: none;">
           <div class="row-title" style="text-align: center;">Код подтверждения</div>
           <div class="row-caption" style="text-align: center;">Введите 5 цифр из сообщения Telegram</div>
@@ -830,7 +822,6 @@
           </div>
         </div>
 
-        <!-- Шаг 3: Ввод пароля 2FA -->
         <div id="step2FABox" style="display: none;">
           <div class="row-title">Облачный пароль 2FA</div>
           <div class="row-caption">На аккаунте установлена двухфакторная аутентификация</div>
@@ -840,7 +831,6 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 3: ТАРИФЫ -->
     <section id="pane-tariffs" class="tab-pane">
       <div class="ios-group-header">Тарифные планы</div>
 
@@ -872,7 +862,6 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 4: ОПЛАТА -->
     <section id="pane-payment" class="tab-pane">
       <div class="ios-group-header">Оформление подписки</div>
       <div class="ios-list-card">
@@ -902,35 +891,25 @@
       <button class="ios-full-btn tap-glass" onclick="submitPaymentRequest()">Оформить заявку</button>
     </section>
 
-    <!-- ВКЛАДКА 5: ИНФО -->
     <section id="pane-info" class="tab-pane">
-      <div class="ios-group-header">Сведения о системе</div>
+      <div class="ios-group-header">Инфо</div>
       <div class="ios-list-card">
         <div class="ios-row">
-          <div class="row-title">Версия ядра</div>
-          <div class="row-caption">AutoBot PR GRAM Core 3.0</div>
+          <div class="row-title">Ваш ID:</div>
+          <div id="infoUidLabel" style="font-size: 15px; font-weight: 600;">—</div>
         </div>
         <div class="ios-row">
-          <div class="row-title">Разработчики</div>
-          <div class="row-caption">Lucid & Telvory</div>
+          <div class="row-title">Дней пользования:</div>
+          <div id="infoDaysLabel" style="font-size: 15px; font-weight: 600;">1</div>
         </div>
         <div class="ios-row">
-          <div class="row-title">Синхронизация</div>
-          <div id="infoConnLabel" class="row-caption" style="color: var(--ios-green);">Firebase Realtime DB</div>
-        </div>
-        <div class="ios-row">
-          <div class="row-title">Ваш Telegram ID</div>
-          <div id="infoUidLabel" class="row-caption">—</div>
+          <div class="row-title">ТГК:</div>
+          <span class="info-link tap-glass" onclick="openExternal('https://t.me/Lucid_Company')">@Lucid_Company</span>
         </div>
       </div>
-
-      <button class="ios-full-btn tap-glass" onclick="openExternal('https://t.me/autobotpiarbot')">
-        Открыть диалог с ботом
-      </button>
     </section>
   </div>
 
-  <!-- Нижний таб-бар -->
   <nav class="ios-tabbar">
     <div class="tab-btn active tap-glass" onclick="switchPane('dashboard', this)">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>
@@ -958,11 +937,11 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, onValue, update, set, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    const firebaseConfig = {
+    const storageConfig = {
       databaseURL: "https://autobotbd-62b2d-default-rtdb.firebaseio.com"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp(storageConfig);
     const db = getDatabase(app);
 
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -985,6 +964,7 @@
     document.getElementById("infoUidLabel").textContent = String(USER_ID);
 
     let localUser = {
+      created_at: Math.floor(Date.now() / 1000),
       bot_active: false,
       tariff: "none",
       settings: {
@@ -1030,9 +1010,8 @@
     const connRef = ref(db, ".info/connected");
     onValue(connRef, (snap) => {
       const online = Boolean(snap.val());
-      document.getElementById("fbStatusDot").classList.toggle("offline", !online);
-      document.getElementById("fbStatusText").textContent = online ? "Realtime" : "Offline";
-      document.getElementById("infoConnLabel").textContent = online ? "Firebase Live (Подключено)" : "Отключено";
+      document.getElementById("connStatusDot").classList.toggle("offline", !online);
+      document.getElementById("connStatusText").textContent = online ? "Online" : "Offline";
     });
 
     const userRef = ref(db, `users/${USER_ID}`);
@@ -1043,6 +1022,7 @@
           user_id: USER_ID,
           username: tgUser.username || "",
           first_name: tgUser.first_name || "",
+          created_at: Math.floor(Date.now() / 1000),
           tariff: "none",
           tariff_until: 0,
           bot_active: false,
@@ -1052,6 +1032,11 @@
         };
         set(userRef, initPayload);
         return;
+      }
+      if (!val.created_at) {
+        const nowSec = Math.floor(Date.now() / 1000);
+        update(userRef, { created_at: nowSec });
+        val.created_at = nowSec;
       }
       localUser = {
         ...localUser,
@@ -1067,7 +1052,7 @@
       const isRun = Boolean(localUser.bot_active);
       const ind = document.getElementById("engineIndicator");
       const btn = document.getElementById("engineToggleBtn");
-      ind.textContent = isRun ? "● Работает" : "● Остановлен";
+      ind.textContent = isRun ? "Работает" : "Остановлен";
       ind.classList.toggle("on", isRun);
       btn.textContent = isRun ? "Остановить" : "Запустить";
       btn.classList.toggle("stop", isRun);
@@ -1076,6 +1061,10 @@
       document.getElementById("engineSubMeta").textContent = `Тариф: ${tMap[localUser.tariff] || localUser.tariff}`;
 
       document.getElementById("liveBroadcastSection").style.display = isRun ? "block" : "none";
+
+      const createdSec = Number(localUser.created_at) || Math.floor(Date.now() / 1000);
+      const usedDays = Math.max(1, Math.floor((Date.now() / 1000 - createdSec) / 86400) + 1);
+      document.getElementById("infoDaysLabel").textContent = String(usedDays);
 
       const s = localUser.settings;
       document.getElementById("segBotGram").classList.toggle("selected", s.target_bot === "gram_prbot");
@@ -1181,8 +1170,8 @@
       if (isAuth) {
         document.getElementById("accProfileName").textContent = acc.name || "Telegram Аккаунт";
         document.getElementById("accProfileMeta").textContent = `${acc.phone || ""} · @${acc.username || "user"}`;
-        document.getElementById("accDeviceModel").textContent = acc.device_model || "Nokia 3310 Ultra Pro Max";
-        document.getElementById("accSystemVersion").textContent = acc.system_version || "BolgenOS 2.0";
+        document.getElementById("accDeviceModel").textContent = acc.device_model || "Холодильник";
+        document.getElementById("accSystemVersion").textContent = acc.system_version || "Розетка 220В";
         return;
       }
 
