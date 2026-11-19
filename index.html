@@ -8,13 +8,13 @@
   <style>
     :root {
       --bg-base: #000000;
-      --bg-elevated: rgba(28, 28, 30, 0.72);
-      --bg-grouped: rgba(44, 44, 46, 0.55);
+      --bg-elevated: rgba(28, 28, 30, 0.76);
+      --bg-grouped: rgba(44, 44, 46, 0.58);
       --separator: rgba(255, 255, 255, 0.11);
       --glass-border: rgba(255, 255, 255, 0.14);
       --label-primary: #FFFFFF;
-      --label-secondary: rgba(235, 235, 245, 0.6);
-      --label-tertiary: rgba(235, 235, 245, 0.35);
+      --label-secondary: rgba(235, 235, 245, 0.62);
+      --label-tertiary: rgba(235, 235, 245, 0.36);
       --ios-blue: #0A84FF;
       --ios-green: #30D158;
       --ios-red: #FF453A;
@@ -22,12 +22,11 @@
       --tg-chat-bg: #0E1621;
       --tg-bubble-in: #182533;
       --tg-btn-bg: rgba(43, 82, 120, 0.48);
-      --tg-btn-active: #2B5278;
     }
 
     body.light-theme {
       --bg-base: #F2F2F7;
-      --bg-elevated: rgba(255, 255, 255, 0.78);
+      --bg-elevated: rgba(255, 255, 255, 0.82);
       --bg-grouped: rgba(120, 120, 128, 0.12);
       --separator: rgba(60, 60, 67, 0.14);
       --glass-border: rgba(0, 0, 0, 0.08);
@@ -40,7 +39,6 @@
       --tg-chat-bg: #728AA1;
       --tg-bubble-in: #FFFFFF;
       --tg-btn-bg: rgba(0, 0, 0, 0.28);
-      --tg-btn-active: rgba(0, 122, 255, 0.75);
     }
 
     * {
@@ -66,8 +64,8 @@
       inset: 0;
       z-index: -1;
       background:
-        radial-gradient(circle at 15% 8%, rgba(10, 132, 255, 0.14), transparent 48%),
-        radial-gradient(circle at 85% 82%, rgba(48, 209, 88, 0.09), transparent 50%);
+        radial-gradient(circle at 15% 8%, rgba(10, 132, 255, 0.12), transparent 46%),
+        radial-gradient(circle at 85% 84%, rgba(48, 209, 88, 0.08), transparent 48%);
       pointer-events: none;
     }
 
@@ -128,15 +126,21 @@
       color: var(--label-secondary);
     }
 
-    .conn-dot {
+    .status-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
       background: var(--ios-green);
+      display: inline-block;
+      flex-shrink: 0;
     }
 
-    .conn-dot.offline {
+    .status-dot.offline {
       background: var(--ios-red);
+    }
+
+    .status-dot.idle {
+      background: var(--label-tertiary);
     }
 
     .tab-pane {
@@ -164,6 +168,10 @@
       border-radius: 18px;
       padding: 14px 16px;
       margin-bottom: 12px;
+    }
+
+    .ios-card.plan-active {
+      border: 1px solid var(--ios-blue);
     }
 
     .ios-list-card {
@@ -231,10 +239,17 @@
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     .ios-primary-btn.stop {
       background: var(--ios-red);
+    }
+
+    .ios-primary-btn:disabled,
+    .ios-full-btn:disabled {
+      opacity: 0.55;
+      pointer-events: none;
     }
 
     .ios-full-btn {
@@ -251,14 +266,14 @@
     }
 
     .ios-full-btn.secondary {
-      background: rgba(10, 132, 255, 0.16);
+      background: rgba(10, 132, 255, 0.15);
       color: var(--ios-blue);
       border: 0.5px solid rgba(10, 132, 255, 0.35);
       margin-top: 8px;
     }
 
     .ios-full-btn.destructive {
-      background: rgba(255, 69, 58, 0.16);
+      background: rgba(255, 69, 58, 0.15);
       color: var(--ios-red);
       border: 0.5px solid rgba(255, 69, 58, 0.35);
     }
@@ -322,7 +337,6 @@
       transform: translateX(20px);
     }
 
-    /* ОП Карточка (4 Спонсора) */
     .op-gate-card {
       border: 1px solid rgba(10, 132, 255, 0.45);
       background: rgba(10, 132, 255, 0.08);
@@ -348,6 +362,7 @@
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
+      text-align: left;
     }
 
     .tg-chat-frame {
@@ -476,12 +491,15 @@
       transition: all 0.2s ease;
     }
 
-    .tg-kb-btn .link-arrow {
+    .tg-kb-btn.is-link::after {
+      content: "";
       position: absolute;
-      top: 3px;
-      right: 5px;
-      font-size: 9px;
-      opacity: 0.65;
+      top: 4px;
+      right: 4px;
+      width: 5px;
+      height: 5px;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.65);
+      border-right: 1.5px solid rgba(255, 255, 255, 0.65);
     }
 
     .tg-kb-btn.pressed-now {
@@ -508,6 +526,7 @@
       font-size: 11.5px;
       line-height: 1.48;
       color: #D1D1D6;
+      user-select: text;
     }
 
     .log-row {
@@ -594,6 +613,32 @@
       color: var(--label-secondary);
     }
 
+    .acc-actions-row {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px 14px;
+    }
+
+    .acc-actions-row .ios-full-btn {
+      padding: 10px 12px;
+      font-size: 13px;
+      margin-top: 0;
+    }
+
+    .badge-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(48, 209, 88, 0.16);
+      color: var(--ios-green);
+    }
+
+    .badge-pill.blue {
+      background: rgba(10, 132, 255, 0.16);
+      color: var(--ios-blue);
+    }
+
     .admin-btn-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -669,6 +714,10 @@
       z-index: 200;
       transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      white-space: nowrap;
+      max-width: 90vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .ios-toast.visible {
@@ -695,16 +744,18 @@
         <div id="userHeaderSub" class="nav-subtitle">Синхронизация...</div>
       </div>
       <div class="conn-pill">
-        <span id="connStatusDot" class="conn-dot"></span>
+        <span id="connStatusDot" class="status-dot"></span>
         <span id="connStatusText">Online</span>
       </div>
     </header>
 
-    <!-- ВКЛАДКА 1: ПАНЕЛЬ -->
     <section id="pane-dashboard" class="tab-pane active">
       <div class="ios-card engine-bar">
         <div>
-          <div id="engineIndicator" class="state-indicator">Остановлен</div>
+          <div id="engineIndicator" class="state-indicator">
+            <span id="engineStatusDot" class="status-dot idle"></span>
+            <span id="engineStatusText">Остановлен</span>
+          </div>
           <div style="font-size: 16px; font-weight: 600;">Автовыполнение заданий</div>
           <div id="engineSubMeta" class="row-caption">Тариф: проверка...</div>
         </div>
@@ -713,16 +764,18 @@
         </button>
       </div>
 
-      <!-- Блок обязательной подписки на 4 спонсоров (ОП) перед запуском -->
       <div id="opGateSection" class="ios-card op-gate-card" style="display: none;">
         <div style="font-size: 16px; font-weight: 700;">Обязательная подписка (4 ОП)</div>
         <div class="row-caption" style="margin-top: 3px;">
-          Для запуска AutoBot PR GRAM Core подпишитесь на спонсоров ниже и нажмите «Проверить подписку»:
+          Для запуска AutoBot PR GRAM Core подпишитесь на спонсоров ниже и нажмите Проверить подписку:
         </div>
         <div id="opErrorLabel" style="display: none; color: var(--ios-red); font-size: 12.5px; font-weight: 600; margin-top: 8px;"></div>
         <div id="opSponsorsList" class="op-sponsor-list"></div>
         <button id="opVerifyBtn" class="ios-full-btn tap-glass" onclick="verifyOpSubscription()">
           Проверить подписку
+        </button>
+        <button class="ios-full-btn secondary tap-glass" onclick="cancelOpGate()">
+          Отмена
         </button>
       </div>
 
@@ -737,7 +790,7 @@
                 <div id="screenPressedStatus" class="tg-header-sub">бот онлайн</div>
               </div>
             </div>
-            <div id="screenTimestamp" style="font-size: 11px; color: rgba(255,255,255,0.5);">Live</div>
+            <div style="font-size: 11px; color: rgba(255,255,255,0.5);">Live</div>
           </div>
 
           <div class="tg-chat-viewport">
@@ -745,7 +798,7 @@
               <div id="screenFwdHeader" class="tg-fwd-header" style="display: none;"></div>
               <div id="screenMediaTag" class="tg-media-tag" style="display: none;"></div>
               <div id="screenMessageText" class="tg-msg-text">Ожидание сообщения от биржи...</div>
-              <div id="screenMsgTime" class="tg-msg-meta">12:00</div>
+              <div id="screenMsgTime" class="tg-msg-meta">00:00</div>
             </div>
             <div id="screenInlineKeyboard" class="tg-inline-keyboard"></div>
           </div>
@@ -791,7 +844,7 @@
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
             <input id="inputDelayMin" type="number" min="2" max="60" class="number-input-mini" value="10" onchange="saveDelayRange()" />
-            <span style="color: var(--label-secondary);">—</span>
+            <span style="color: var(--label-secondary);">-</span>
             <input id="inputDelayMax" type="number" min="3" max="120" class="number-input-mini" value="14" onchange="saveDelayRange()" />
           </div>
         </div>
@@ -799,7 +852,7 @@
         <div class="ios-row">
           <div>
             <div class="row-title">Обход бана</div>
-            <div class="row-caption">Доступно на тарифе «Средний»</div>
+            <div class="row-caption">Доступно на тарифе Средний</div>
           </div>
           <div id="swBypassBan" class="ui-switch" onclick="toggleBooleanSetting('bypass_ban')"></div>
         </div>
@@ -814,34 +867,13 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 2: АККАУНТ -->
     <section id="pane-account" class="tab-pane">
-      <div class="ios-group-header">Telegram-сессия</div>
+      <div class="ios-group-header" id="accountsHeaderTitle">Telegram-сессии (0 / 0)</div>
 
-      <div id="authorizedProfileCard" style="display: none;">
-        <div class="ios-list-card">
-          <div class="ios-row">
-            <div>
-              <div id="accProfileName" style="font-size: 17px; font-weight: 600;">Пользователь</div>
-              <div id="accProfileMeta" class="row-caption">+7... · ID 0</div>
-            </div>
-            <span style="font-size: 12px; font-weight: 600; color: var(--ios-green);">Авторизован</span>
-          </div>
-          <div class="ios-row">
-            <div class="row-title">Устройство</div>
-            <div id="accDeviceModel" style="font-size: 14px; color: var(--ios-blue); font-weight: 600;">Python</div>
-          </div>
-          <div class="ios-row">
-            <div class="row-title">ОС</div>
-            <div id="accSystemVersion" style="font-size: 14px; color: var(--label-primary); font-weight: 500;">Python</div>
-          </div>
-          <div class="ios-row">
-            <div class="row-title">Версия</div>
-            <div id="accAppVersion" style="font-size: 14px; color: var(--label-secondary);">1.0.0</div>
-          </div>
-        </div>
-        <button class="ios-full-btn destructive tap-glass" onclick="requestUnbindAccount()">
-          Отвязать аккаунт
+      <div id="boundAccountsSection" style="display: none;">
+        <div id="boundAccountsList"></div>
+        <button id="addAccountBtn" class="ios-full-btn secondary tap-glass" style="display: none; margin-bottom: 12px;" onclick="openAddAccountWizard()">
+          Привязать дополнительный аккаунт
         </button>
       </div>
 
@@ -849,10 +881,13 @@
         <div id="authErrorBanner" style="display:none; color: var(--ios-red); font-size: 13px; margin-bottom: 10px; font-weight: 500;"></div>
 
         <div id="stepPhoneBox">
-          <div class="row-title">Привязка аккаунта</div>
-          <div class="row-caption">Сессия: Устройство Python · ОС Python · Версия 1.0.0</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="row-title">Привязка аккаунта</div>
+            <span id="closeWizardLink" style="display:none; font-size:13px; color:var(--ios-blue); cursor:pointer; font-weight:600;" onclick="closeAddAccountWizard()">Закрыть</span>
+          </div>
+          <div class="row-caption">Сессия: Устройство Python | ОС Python | Версия 1.0.0</div>
           <input id="authPhoneField" type="tel" class="ios-input" placeholder="+7 999 123 45 67" />
-          <button class="ios-full-btn tap-glass" onclick="triggerSendPhone()">Получить код</button>
+          <button id="sendPhoneBtn" class="ios-full-btn tap-glass" onclick="triggerSendPhone()">Получить код</button>
         </div>
 
         <div id="stepCodeBox" style="display: none;">
@@ -892,47 +927,55 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 3: ТАРИФЫ -->
     <section id="pane-tariffs" class="tab-pane">
       <div class="ios-group-header">Тарифные планы</div>
 
       <div id="planCardBasic" class="ios-card">
         <div style="display: flex; justify-content: space-between; align-items: baseline;">
-          <div style="font-size: 18px; font-weight: 700;">Базовый</div>
-          <div style="font-size: 17px; font-weight: 600; color: var(--ios-blue);">29 ₽ / мес</div>
+          <div style="font-size: 18px; font-weight: 700;">Базовый <span id="badgeBasicActive" class="badge-pill blue" style="display:none; margin-left:6px;">Активен</span></div>
+          <div style="font-size: 17px; font-weight: 600; color: var(--ios-blue);">29 Р / мес</div>
         </div>
-        <div class="row-caption" style="margin: 10px 0 14px; line-height: 1.55;">
-          • Задания категорий «Каналы» и «Группы»<br/>
-          • Подключение 1 аккаунта<br/>
-          • Автоматическая архивация чатов
+        <div class="row-caption" style="margin: 10px 0 14px; line-height: 1.6;">
+          - Задания категорий Каналы и Группы<br/>
+          - Подключение до 1 аккаунта<br/>
+          - Автоматическая архивация чатов
         </div>
-        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('basic')">Купить Базовый (29 ₽)</button>
+        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('basic')">Купить Базовый (29 Р)</button>
       </div>
 
       <div id="planCardMedium" class="ios-card">
         <div style="display: flex; justify-content: space-between; align-items: baseline;">
-          <div style="font-size: 18px; font-weight: 700;">Средний</div>
-          <div style="font-size: 17px; font-weight: 600; color: var(--ios-green);">49 ₽ / мес</div>
+          <div style="font-size: 18px; font-weight: 700;">Средний <span id="badgeMediumActive" class="badge-pill" style="display:none; margin-left:6px;">Активен</span></div>
+          <div style="font-size: 17px; font-weight: 600; color: var(--ios-green);">49 Р / мес</div>
         </div>
-        <div class="row-caption" style="margin: 10px 0 14px; line-height: 1.55;">
-          • Все категории: Каналы, Группы, Просмотры<br/>
-          • Подключение до 3 аккаунтов<br/>
-          • Умный обход бана (имитация человека)<br/>
-          • Автоматический сбор чеков на основной аккаунт
+        <div class="row-caption" style="margin: 10px 0 14px; line-height: 1.6;">
+          - Все категории: Каналы, Группы, Просмотры<br/>
+          - Параллельная работа до 3 аккаунтов<br/>
+          - Обход бана (имитация человека)<br/>
+          - Автоматический сбор чеков на основной аккаунт
         </div>
-        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('medium')">Купить Средний (49 ₽)</button>
+        <button class="ios-full-btn tap-glass" onclick="openPayWithPlan('medium')">Купить Средний (49 Р)</button>
+      </div>
+
+      <div class="ios-card" style="opacity: 0.65;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <div style="font-size: 18px; font-weight: 700;">Флагманский</div>
+          <div style="font-size: 13px; font-weight: 600; color: var(--ios-orange);">В разработке</div>
+        </div>
+        <div class="row-caption" style="margin-top: 8px;">
+          Расширенный лимит аккаунтов и выделенный пул.
+        </div>
       </div>
     </section>
 
-    <!-- ВКЛАДКА 4: ОПЛАТА -->
     <section id="pane-payment" class="tab-pane">
       <div class="ios-group-header">Оплата через CryptoBot</div>
       <div class="ios-list-card">
         <div class="ios-row" style="flex-direction: column; align-items: stretch;">
           <div class="row-title">Выберите тариф</div>
           <div class="ios-segmented" style="margin-top: 8px;">
-            <div id="payOptBasic" class="seg-option tap-glass selected" onclick="selectPayPlan('basic')">Базовый (29 ₽)</div>
-            <div id="payOptMedium" class="seg-option tap-glass" onclick="selectPayPlan('medium')">Средний (49 ₽)</div>
+            <div id="payOptBasic" class="seg-option tap-glass selected" onclick="selectPayPlan('basic')">Базовый (29 Р)</div>
+            <div id="payOptMedium" class="seg-option tap-glass" onclick="selectPayPlan('medium')">Средний (49 Р)</div>
           </div>
         </div>
 
@@ -943,7 +986,7 @@
 
         <div class="ios-row">
           <div class="row-title">Сумма к оплате (30 дней)</div>
-          <div id="paySummaryPrice" style="font-size: 16px; font-weight: 700; color: var(--ios-green);">29 ₽</div>
+          <div id="paySummaryPrice" style="font-size: 16px; font-weight: 700; color: var(--ios-green);">29 Р</div>
         </div>
       </div>
 
@@ -963,13 +1006,12 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 5: ИНФО -->
     <section id="pane-info" class="tab-pane">
       <div class="ios-group-header">Инфо</div>
       <div class="ios-list-card">
         <div class="ios-row">
           <div class="row-title">Ваш ID:</div>
-          <div id="infoUidLabel" style="font-size: 15px; font-weight: 600;">—</div>
+          <div id="infoUidLabel" style="font-size: 15px; font-weight: 600;">-</div>
         </div>
         <div class="ios-row">
           <div class="row-title">Дней пользования:</div>
@@ -982,7 +1024,6 @@
       </div>
     </section>
 
-    <!-- ВКЛАДКА 6: АДМИН ПАНЕЛЬ (ТОЛЬКО ДЛЯ ADMIN_ID) -->
     <section id="pane-admin" class="tab-pane">
       <div class="ios-group-header">Статус выполнения команды</div>
       <div class="ios-card">
@@ -1016,7 +1057,7 @@
           <div id="admCodeBasic" class="seg-option selected" onclick="selectAdmCodeTariff('basic')">Базовый</div>
           <div id="admCodeMedium" class="seg-option" onclick="selectAdmCodeTariff('medium')">Средний</div>
         </div>
-        <input id="admCodeDays" type="number" class="ios-input" placeholder="Количество дней (например: 10)" value="10" />
+        <input id="admCodeDays" type="number" class="ios-input" placeholder="Количество дней" value="10" />
         <button class="ios-full-btn tap-glass" onclick="triggerAdminNewCode()">Создать код</button>
       </div>
 
@@ -1102,7 +1143,7 @@
     };
 
     const USER_ID = Number(tgUser.id);
-    document.getElementById("userHeaderSub").textContent = `@${tgUser.username || "user"} · ID ${USER_ID}`;
+    document.getElementById("userHeaderSub").textContent = `@${tgUser.username || "user"} | ID ${USER_ID}`;
     document.getElementById("infoUidLabel").textContent = String(USER_ID);
 
     if (USER_ID === ADMIN_ID) {
@@ -1114,6 +1155,7 @@
       bot_active: false,
       tariff: "none",
       tariff_until: 0,
+      max_accounts: 0,
       settings: {
         target_bot: "gram_prbot",
         targets: "channels",
@@ -1124,6 +1166,7 @@
         delay_max: 14
       },
       account: { authorized: false },
+      accounts_list: [],
       auth_flow: { step: "idle" },
       op_flow: { status: "idle", sponsors: [] },
       payment_flow: { status: "idle", pay_url: "", invoice_id: 0 }
@@ -1133,6 +1176,9 @@
     let selectedPlan = "basic";
     let admCodeTariff = "basic";
     let lastOpenedInvoiceId = 0;
+    let wizardForceOpen = false;
+    let prevAccountsCount = 0;
+    let startClickCooldown = 0;
 
     function haptic(style = "light") {
       try {
@@ -1165,6 +1211,37 @@
       return true;
     }
 
+    function getMaxAccounts() {
+      if (!hasActiveTariff()) return 0;
+      if (localUser.tariff === "medium") return 3;
+      if (localUser.tariff === "basic") return 1;
+      return 0;
+    }
+
+    function getNormalizedAccounts() {
+      if (Array.isArray(localUser.accounts_list) && localUser.accounts_list.length > 0) {
+        return localUser.accounts_list;
+      }
+      if (localUser.accounts_list && typeof localUser.accounts_list === "object") {
+        const vals = Object.values(localUser.accounts_list).filter(Boolean);
+        if (vals.length > 0) return vals;
+      }
+      if (localUser.account && localUser.account.authorized) {
+        return [{
+          id: 0,
+          phone: localUser.account.phone || "",
+          is_main: true,
+          name: localUser.account.name || "Аккаунт",
+          username: localUser.account.username || "",
+          tg_id: localUser.account.tg_id || USER_ID,
+          device_model: "Python",
+          system_version: "Python",
+          app_version: "1.0.0"
+        }];
+      }
+      return [];
+    }
+
     const connRef = ref(db, ".info/connected");
     onValue(connRef, (snap) => {
       const online = Boolean(snap.val());
@@ -1183,8 +1260,10 @@
           created_at: Math.floor(Date.now() / 1000),
           tariff: "none",
           tariff_until: 0,
+          max_accounts: 0,
           bot_active: false,
           start_request: false,
+          stop_request: false,
           settings: localUser.settings,
           account: {
             authorized: false,
@@ -1192,6 +1271,7 @@
             system_version: "Python",
             app_version: "1.0.0"
           },
+          accounts_list: [],
           auth_flow: { step: "idle" },
           op_flow: { status: "idle", sponsors: [] },
           payment_flow: { status: "idle", invoice_id: 0, pay_url: "" }
@@ -1209,10 +1289,21 @@
         ...val,
         settings: { ...localUser.settings, ...(val.settings || {}) },
         account: { ...(val.account || {}) },
+        accounts_list: val.accounts_list || [],
         auth_flow: { ...(val.auth_flow || {}) },
         op_flow: { ...(val.op_flow || {}) },
         payment_flow: { ...(val.payment_flow || {}) }
       };
+
+      const curAccs = getNormalizedAccounts();
+      if (curAccs.length > prevAccountsCount && wizardForceOpen) {
+        wizardForceOpen = false;
+        document.getElementById("authPhoneField").value = "";
+        document.getElementById("auth2FAField").value = "";
+        notifyToast("Аккаунт успешно привязан");
+      }
+      prevAccountsCount = curAccs.length;
+
       renderAll();
     });
 
@@ -1228,7 +1319,7 @@
         const summary = Array.isArray(adm.summary) ? adm.summary : Object.values(adm.summary || {});
         const box = document.getElementById("admUsersConsole");
         if (!summary.length) {
-          box.textContent = "Нет данных. Нажмите «Обновить список (/info)».";
+          box.textContent = "Нет данных. Нажмите Обновить список (/info).";
         } else {
           box.innerHTML = summary.map((u) => {
             const st = u.banned ? "Бан" : (u.bot_active ? "Работает" : "Стоп");
@@ -1240,20 +1331,31 @@
 
     function renderAll() {
       const activeTariff = hasActiveTariff();
+      const accs = getNormalizedAccounts();
+      const maxAccs = getMaxAccounts();
       const isRun = Boolean(localUser.bot_active) && activeTariff;
 
       const ind = document.getElementById("engineIndicator");
+      const dot = document.getElementById("engineStatusDot");
+      const stTxt = document.getElementById("engineStatusText");
       const btn = document.getElementById("engineToggleBtn");
-      ind.textContent = isRun ? "Работает" : "Остановлен";
+
+      stTxt.textContent = isRun ? "Работает" : "Остановлен";
       ind.classList.toggle("on", isRun);
+      dot.classList.toggle("idle", !isRun);
       btn.textContent = isRun ? "Остановить" : "Запустить";
       btn.classList.toggle("stop", isRun);
 
-      const tMap = { none: "Не куплен (Нажмите «Тарифы»)", basic: "Базовый", medium: "Средний" };
+      const tMap = { none: "Не куплен", basic: "Базовый", medium: "Средний" };
       const remDays = activeTariff ? Math.max(0, Math.ceil((Number(localUser.tariff_until) - Date.now() / 1000) / 86400)) : 0;
       document.getElementById("engineSubMeta").textContent = activeTariff
-        ? `Тариф: ${tMap[localUser.tariff]} (осталось ${remDays} дн.)`
-        : `Тариф: ${tMap.none}`;
+        ? `Тариф: ${tMap[localUser.tariff]} (${remDays} дн.) | Аккаунты: ${accs.length}/${maxAccs}`
+        : `Тариф: ${tMap.none} | Откройте вкладку Тарифы`;
+
+      document.getElementById("planCardBasic").classList.toggle("plan-active", activeTariff && localUser.tariff === "basic");
+      document.getElementById("planCardMedium").classList.toggle("plan-active", activeTariff && localUser.tariff === "medium");
+      document.getElementById("badgeBasicActive").style.display = (activeTariff && localUser.tariff === "basic") ? "inline-block" : "none";
+      document.getElementById("badgeMediumActive").style.display = (activeTariff && localUser.tariff === "medium") ? "inline-block" : "none";
 
       renderOpGate(localUser.op_flow || {}, isRun);
 
@@ -1282,7 +1384,7 @@
 
       renderLiveScreen1to1(localUser.screen || {});
       renderLogsStream(localUser.logs || []);
-      renderAccountSection(localUser.account || {}, localUser.auth_flow || {});
+      renderAccountSection(accs, maxAccs, localUser.auth_flow || {});
       renderPaymentSection(localUser.payment_flow || {});
     }
 
@@ -1292,7 +1394,8 @@
       const errEl = document.getElementById("opErrorLabel");
       const verifyBtn = document.getElementById("opVerifyBtn");
 
-      if (isRun || (opFlow.status !== "need_op" && opFlow.status !== "checking")) {
+      const activeStates = ["need_op", "checking", "verifying_now"];
+      if (isRun || !activeStates.includes(opFlow.status)) {
         gateBox.style.display = "none";
         return;
       }
@@ -1305,15 +1408,16 @@
         errEl.style.display = "none";
       }
 
-      verifyBtn.textContent = opFlow.status === "checking" ? "Проверка подписки..." : "Проверить подписку";
-      verifyBtn.disabled = opFlow.status === "checking";
+      const isChecking = opFlow.status === "checking" || opFlow.status === "verifying_now";
+      verifyBtn.textContent = isChecking ? "Проверка подписки..." : "Проверить подписку";
+      verifyBtn.disabled = isChecking;
 
       const sponsors = Array.isArray(opFlow.sponsors) ? opFlow.sponsors : Object.values(opFlow.sponsors || {});
       listEl.innerHTML = "";
       sponsors.forEach((sp) => {
         const b = document.createElement("button");
         b.className = "op-sponsor-btn tap-glass";
-        b.innerHTML = `<span>${escapeHtml(sp.title || "Спонсор")}</span><span style="color:var(--ios-blue);">Подписаться ↗</span>`;
+        b.innerHTML = `<span>${escapeHtml(sp.title || "Спонсор")}</span><span style="color:var(--ios-blue);">Перейти</span>`;
         b.onclick = () => openExternal(sp.url);
         listEl.appendChild(b);
       });
@@ -1335,7 +1439,7 @@
         createBtn.textContent = "Создание счета в CryptoBot...";
         createBtn.disabled = true;
       } else {
-        createBtn.textContent = "Создать новый счет в CryptoBot";
+        createBtn.textContent = "Оплатить в CryptoBot";
         createBtn.disabled = false;
       }
 
@@ -1343,7 +1447,7 @@
         invBox.style.display = "block";
         if (pf.invoice_id && pf.invoice_id !== lastOpenedInvoiceId) {
           lastOpenedInvoiceId = pf.invoice_id;
-          notifyToast("Счет создан! Открываю CryptoBot...");
+          notifyToast("Счет создан. Открываю CryptoBot...");
           openExternal(pf.pay_url);
         }
       } else if (pf.status === "paid") {
@@ -1387,15 +1491,10 @@
           rowDiv.className = "tg-kb-row";
           rowArr.forEach((btnObj) => {
             const b = document.createElement("div");
-            const isPressed = Boolean(btnObj.pressed) || (scr.pressed && scr.pressed === btnObj.text);
-            b.className = "tg-kb-btn" + (isPressed ? " pressed-now" : "");
+            const isPressed = Boolean(btnObj.pressed) || Boolean(btnObj.active) || (scr.pressed && scr.pressed === btnObj.text);
+            const isLink = Boolean(btnObj.is_link || btnObj.url);
+            b.className = "tg-kb-btn" + (isPressed ? " pressed-now" : "") + (isLink ? " is-link" : "");
             b.textContent = btnObj.text || "Кнопка";
-            if (btnObj.is_link || btnObj.url) {
-              const arr = document.createElement("span");
-              arr.className = "link-arrow";
-              arr.textContent = "↗";
-              b.appendChild(arr);
-            }
             rowDiv.appendChild(b);
           });
           kbContainer.appendChild(rowDiv);
@@ -1407,26 +1506,66 @@
       const box = document.getElementById("logsConsole");
       const arr = Array.isArray(logs) ? logs : Object.values(logs || {});
       if (!arr.length) return;
+      const wasAtBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 35;
       box.innerHTML = arr.map((item) => {
         const ts = item.ts || "--:--:--";
         const txt = item.text || item.message || "";
         return `<div class="log-row"><span class="log-time">[${escapeHtml(ts)}]</span>${escapeHtml(txt)}</div>`;
       }).join("");
-      box.scrollTop = box.scrollHeight;
+      if (wasAtBottom) box.scrollTop = box.scrollHeight;
     }
 
-    function renderAccountSection(acc, flow) {
-      const isAuth = Boolean(acc.authorized) || flow.step === "authorized";
-      document.getElementById("authorizedProfileCard").style.display = isAuth ? "block" : "none";
-      document.getElementById("authFlowContainer").style.display = isAuth ? "none" : "block";
+    function renderAccountSection(accs, maxAccs, flow) {
+      document.getElementById("accountsHeaderTitle").textContent = `Telegram-сессии (${accs.length} / ${maxAccs})`;
 
-      if (isAuth) {
-        document.getElementById("accProfileName").textContent = acc.name || "Telegram Аккаунт";
-        document.getElementById("accProfileMeta").textContent = `${acc.phone || ""} · @${acc.username || "user"}`;
-        document.getElementById("accDeviceModel").textContent = "Python";
-        document.getElementById("accSystemVersion").textContent = "Python";
-        document.getElementById("accAppVersion").textContent = "1.0.0";
-        return;
+      const boundSection = document.getElementById("boundAccountsSection");
+      const listEl = document.getElementById("boundAccountsList");
+      const addBtn = document.getElementById("addAccountBtn");
+      const wizardBox = document.getElementById("authFlowContainer");
+      const closeLink = document.getElementById("closeWizardLink");
+
+      const st = flow.step || "idle";
+      const inProgressFlow = ["send_phone", "sending_code", "wait_code", "verifying_code", "wait_2fa", "verifying_2fa"].includes(st);
+
+      if (accs.length > 0) {
+        boundSection.style.display = "block";
+        listEl.innerHTML = accs.map((acc) => `
+          <div class="ios-list-card">
+            <div class="ios-row">
+              <div>
+                <div style="font-size: 16px; font-weight: 600;">${escapeHtml(acc.name || "Пользователь")}</div>
+                <div class="row-caption">${escapeHtml(acc.phone || "")} ${acc.username ? "| @" + escapeHtml(acc.username) : ""}</div>
+              </div>
+              <span class="badge-pill ${acc.is_main ? "" : "blue"}">${acc.is_main ? "Основной" : "Доп."}</span>
+            </div>
+            <div class="ios-row">
+              <div class="row-title">Устройство</div>
+              <div style="font-size: 14px; color: var(--ios-blue); font-weight: 600;">Python</div>
+            </div>
+            <div class="ios-row">
+              <div class="row-title">ОС</div>
+              <div style="font-size: 14px; font-weight: 500;">Python</div>
+            </div>
+            <div class="ios-row">
+              <div class="row-title">Версия</div>
+              <div style="font-size: 14px; color: var(--label-secondary);">1.0.0</div>
+            </div>
+            <div class="acc-actions-row">
+              ${!acc.is_main && acc.id ? `<button class="ios-full-btn secondary tap-glass" onclick="requestMakeMainAccount(${Number(acc.id)})">Сделать основным</button>` : ""}
+              <button class="ios-full-btn destructive tap-glass" onclick="requestUnbindAccount(${Number(acc.id || 0)})">Отвязать</button>
+            </div>
+          </div>
+        `).join("");
+
+        const canAddMore = accs.length < maxAccs;
+        addBtn.style.display = (canAddMore && !wizardForceOpen && !inProgressFlow) ? "block" : "none";
+        wizardBox.style.display = (wizardForceOpen || inProgressFlow) ? "block" : "none";
+        closeLink.style.display = (wizardForceOpen && !inProgressFlow) ? "inline" : "none";
+      } else {
+        boundSection.style.display = "none";
+        addBtn.style.display = "none";
+        wizardBox.style.display = "block";
+        closeLink.style.display = "none";
       }
 
       const errEl = document.getElementById("authErrorBanner");
@@ -1437,8 +1576,11 @@
         errEl.style.display = "none";
       }
 
-      const st = flow.step || "idle";
-      document.getElementById("stepPhoneBox").style.display = (st === "idle" || st === "send_phone" || st === "sending_code") ? "block" : "none";
+      const sendBtn = document.getElementById("sendPhoneBtn");
+      sendBtn.disabled = (st === "send_phone" || st === "sending_code");
+      sendBtn.textContent = (st === "send_phone" || st === "sending_code") ? "Отправка кода..." : "Получить код";
+
+      document.getElementById("stepPhoneBox").style.display = (st === "idle" || st === "send_phone" || st === "sending_code" || st === "authorized") ? "block" : "none";
       document.getElementById("stepCodeBox").style.display = (st === "wait_code" || st === "verifying_code") ? "block" : "none";
       document.getElementById("step2FABox").style.display = (st === "wait_2fa" || st === "verifying_2fa") ? "block" : "none";
     }
@@ -1462,27 +1604,33 @@
     window.toggleBotActive = function() {
       haptic("medium");
       if (!localUser.bot_active) {
+        const now = Date.now();
+        if (now - startClickCooldown < 3500) {
+          notifyToast("Подождите пару секунд...");
+          return;
+        }
         if (!hasActiveTariff()) {
           haptic("error");
-          notifyToast("Купите тариф для запуска бота!");
+          notifyToast("Купите тариф для запуска бота");
           const tabs = document.querySelectorAll(".tab-btn");
           switchPane("tariffs", tabs[2]);
           return;
         }
-        if (!localUser.account.authorized) {
+        if (getNormalizedAccounts().length === 0) {
           haptic("error");
-          notifyToast("Сначала привяжите аккаунт!");
+          notifyToast("Сначала привяжите аккаунт");
           const tabs = document.querySelectorAll(".tab-btn");
           switchPane("account", tabs[1]);
           return;
         }
+        startClickCooldown = now;
         notifyToast("Проверка 4 ОП спонсоров...");
-        update(ref(db, `users/${USER_ID}`), { start_request: true });
+        update(ref(db, `users/${USER_ID}`), { start_request: true, stop_request: false });
         return;
       }
-      update(ref(db, `users/${USER_ID}`), { bot_active: false, start_request: false });
-      update(ref(db, `users/${USER_ID}/op_flow`), { status: "idle" });
-      notifyToast("Автобот остановлен");
+      update(ref(db, `users/${USER_ID}`), { bot_active: false, start_request: false, stop_request: true });
+      update(ref(db, `users/${USER_ID}/op_flow`), { status: "idle", error: "" });
+      notifyToast("Автобот останавливается...");
     };
 
     window.verifyOpSubscription = function() {
@@ -1495,17 +1643,26 @@
       });
     };
 
+    window.cancelOpGate = function() {
+      haptic("light");
+      update(ref(db, `users/${USER_ID}/op_flow`), {
+        status: "idle",
+        error: "",
+        updated_at: Date.now()
+      });
+    };
+
     window.updateSetting = function(key, val) {
       if (!hasActiveTariff()) {
         haptic("error");
-        notifyToast("Сначала приобретите тариф!");
+        notifyToast("Сначала приобретите тариф");
         const tabs = document.querySelectorAll(".tab-btn");
         switchPane("tariffs", tabs[2]);
         return;
       }
       if (key === "targets" && val === "views" && localUser.tariff !== "medium") {
         haptic("error");
-        notifyToast("«Просмотры» доступны только на тарифе Средний!");
+        notifyToast("Просмотры доступны только на тарифе Средний");
         return;
       }
       haptic("selection");
@@ -1516,14 +1673,14 @@
     window.toggleBooleanSetting = function(key) {
       if (!hasActiveTariff()) {
         haptic("error");
-        notifyToast("Сначала приобретите тариф!");
+        notifyToast("Сначала приобретите тариф");
         const tabs = document.querySelectorAll(".tab-btn");
         switchPane("tariffs", tabs[2]);
         return;
       }
       if (key === "bypass_ban" && localUser.tariff !== "medium") {
         haptic("error");
-        notifyToast("Обход бана доступен только на тарифе Средний!");
+        notifyToast("Обход бана доступен только на тарифе Средний");
         return;
       }
       haptic("selection");
@@ -1534,7 +1691,7 @@
     window.saveDelayRange = function() {
       if (!hasActiveTariff()) {
         haptic("error");
-        notifyToast("Сначала приобретите тариф!");
+        notifyToast("Сначала приобретите тариф");
         return;
       }
       const dMin = Math.max(2, Number(document.getElementById("inputDelayMin").value || 10));
@@ -1543,8 +1700,32 @@
       notifyToast("Задержка обновлена");
     };
 
+    window.openAddAccountWizard = function() {
+      haptic("light");
+      wizardForceOpen = true;
+      renderAll();
+    };
+
+    window.closeAddAccountWizard = function() {
+      haptic("light");
+      wizardForceOpen = false;
+      renderAll();
+    };
+
     window.triggerSendPhone = function() {
       haptic("medium");
+      if (!hasActiveTariff()) {
+        haptic("error");
+        notifyToast("Сначала приобретите тариф");
+        const tabs = document.querySelectorAll(".tab-btn");
+        switchPane("tariffs", tabs[2]);
+        return;
+      }
+      if (getNormalizedAccounts().length >= getMaxAccounts()) {
+        haptic("error");
+        notifyToast("Достигнут лимит аккаунтов для вашего тарифа");
+        return;
+      }
       const phone = document.getElementById("authPhoneField").value.trim();
       if (phone.length < 8) {
         notifyToast("Введите корректный номер");
@@ -1618,10 +1799,21 @@
       notifyToast("Проверка пароля 2FA...");
     };
 
-    window.requestUnbindAccount = function() {
+    window.requestMakeMainAccount = function(accId) {
+      haptic("selection");
+      update(ref(db, `users/${USER_ID}/auth_flow`), {
+        step: "set_main",
+        account_id: Number(accId),
+        updated_at: Date.now()
+      });
+      notifyToast("Основной аккаунт обновляется...");
+    };
+
+    window.requestUnbindAccount = function(accId) {
       haptic("warning");
       update(ref(db, `users/${USER_ID}/auth_flow`), {
         step: "unbind",
+        account_id: Number(accId || 0),
         updated_at: Date.now()
       });
       notifyToast("Сессия отключается...");
@@ -1638,7 +1830,7 @@
       selectedPlan = plan;
       document.getElementById("payOptBasic").classList.toggle("selected", plan === "basic");
       document.getElementById("payOptMedium").classList.toggle("selected", plan === "medium");
-      document.getElementById("paySummaryPrice").textContent = plan === "basic" ? "29 ₽" : "49 ₽";
+      document.getElementById("paySummaryPrice").textContent = plan === "basic" ? "29 Р" : "49 Р";
     };
 
     window.submitPaymentRequest = function() {
@@ -1676,7 +1868,6 @@
       });
     };
 
-    /* АДМИН-ФУНКЦИИ */
     window.sendAdminCmd = function(payload) {
       if (USER_ID !== ADMIN_ID) return;
       haptic("medium");
